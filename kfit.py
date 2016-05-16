@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 import scipy, sys, cmath, common
 import scipy.fftpack
 from scipy import optimize
-#from common import get_phase
+from tabulate import tabulate
 
 def argselectdomain(xdata,domain):
     ind=np.searchsorted(xdata,domain)
@@ -124,8 +124,8 @@ def fit_lor(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartf
 
     if verbose:
         parnames = ['offset', 'amplitude', 'f0', 'HWHM']
-        for par, name, err in zip(params, parnames, param_errs):
-            print "%s : %.6f +/- %.6f"%(name, par, err)
+        print tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
+                       tablefmt="rst", floatfmt=".6f", numalign="center", stralign='left')
 
     # Make sure the hwhm is positive
     params[3]=abs(params[3])
