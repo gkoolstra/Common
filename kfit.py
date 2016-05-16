@@ -644,7 +644,7 @@ def fit_lor_asym(xdata, ydata, fitparams=None, domain=None, showfit=False, shows
 def fit_poly(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False,
             label="", verbose=True, **kwarg):
     """
-    Fit a polynomial. Uses polyfunc_v2. Specify fitparams as [p0, p1, p2, ...] where
+    Fit a polynomial. Uses polyfunc. Specify fitparams as [p0, p1, p2, ...] where
     y = p0 + p1*x + p2*x**2 + ...
     :param xdata: x-data
     :param ydata: y-data
@@ -666,7 +666,7 @@ def fit_poly(xdata, ydata, fitparams=None, domain=None, showfit=False, showstart
         fitdatax = xdata
         fitdatay = ydata
 
-    params, param_errs = fitbetter(fitdatax, fitdatay, polyfunc_v2, fitparams, domain=None, showfit=showfit,
+    params, param_errs = fitbetter(fitdatax, fitdatay, polyfunc, fitparams, domain=None, showfit=showfit,
                                    showstartfit=showstartfit, label=label, show_diagnostics=True, **kwarg)
 
     idx = 0
@@ -688,7 +688,7 @@ def fit_poly(xdata, ydata, fitparams=None, domain=None, showfit=False, showstart
 def lorfunc(x, *p):
     """
     Lorentzian with offset, for use with fitgeneral functionality.
-    :param p: [offset, peak amplitude, center, hwhm/2]
+    :param p: [offset, peak amplitude, center, hwhm]
     :param x: Frequency points
     :return: p[0]+p[1]/(1+(x-p[2])**2/p[3]**2)
     """
@@ -910,19 +910,7 @@ def parabolafunc(x, *p):
     """
     return p[0] + p[1]*(x-p[2])**2
 
-def polyfunc(p, x):
-    """
-    Polynomial of arbitrary order. Order is specified by the length of p
-    :param p: [a0, a1, a2, a3, ...] where y = a0 + a1*x + a2*x**2 + ...
-    :param x: x-data
-    :return: p[0] + p[1]*x + p[2]*x**2 + ...
-    """
-    y = 0
-    for n,P in enumerate(p):
-        y += P * x**n
-    return y
-
-def polyfunc_v2(x, *p):
+def polyfunc(x, *p):
     """
     Polynomial of arbitrary order. Order is specified by the length of p
     :param x: x-data
