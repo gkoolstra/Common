@@ -306,7 +306,7 @@ def fit_pulse_err(xdata, ydata, fitparams=None, domain=None, showfit=False, show
 
     return params, param_errs
 
-def fit_decaysin(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False, label=""):
+def fit_decaysin(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False, label="", verbose=True, **kwarg):
     """
     Fits decaying sine wave of form: p[0]*np.sin(2.*pi*p[1]*x+p[2]*pi/180.)*np.e**(-1.*(x-p[5])/p[3])+p[4]
     :param xdata: x-data
@@ -336,10 +336,8 @@ def fit_decaysin(xdata, ydata, fitparams=None, domain=None, showfit=False, shows
         fitparams[2]=(cmath.phase(fft_val)-np.pi/2.)*180./np.pi
         fitparams[3]=(max(fitdatax)-min(fitdatax))
 
-    #decaysin3=lambda p,x: p[0]*np.sin(2.*np.pi*p[1]*x+p[2]*np.pi/180.)*np.e**(-1.*(x-fitdatax[0])/p[3])+p[4]
-
     params, param_errs = fitbetter(fitdatax, fitdatay, decaysin, fitparams, domain=None, showfit=showfit,
-                                   showstartfit=showstartfit, label=label)
+                                   showstartfit=showstartfit, label=label, **kwarg)
 
     if verbose:
         parnames = ['Amplitude', 'Frequency', 'Phi', '1/e time', 'Offset', 'Start time']
@@ -353,7 +351,7 @@ def fit_sin(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartf
     Fits sin wave of form: p[0]*np.sin(2.*pi*p[1]*x+p[2]*pi/180.)+p[3].
     :param xdata: x-data
     :param ydata: y-data
-    :param fitparams: [Amplitude, frequency, phase (deg), offset]
+    :param fitparams: [Amplitude, Frequency (Hz), Phi (deg), Offset]
     :param domain: Tuple
     :param showfit: True/False
     :param showstartfit: True/False
@@ -377,12 +375,11 @@ def fit_sin(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartf
         fitparams[1]=fft_freqs[max_ind]
         fitparams[2]=(cmath.phase(fft_val)-np.pi/2.)*180./np.pi
 
-    sin2=lambda p,x: p[0]*np.sin(2.*np.pi*p[1]*x+p[2]*np.pi/180.)+p[3]
-    params, param_errs = fitbetter(fitdatax, fitdatay, sin2, fitparams, domain=None, showfit=showfit,
-                                   showstartfit=showstartfit, label=label)
+    params, param_errs = fitbetter(fitdatax, fitdatay, sinfunc, fitparams, domain=None, showfit=showfit,
+                                   showstartfit=showstartfit, label=label, **kwarg)
 
     if verbose:
-        parnames = ['Amplitude', 'Frequency', 'Phase', 'Offset']
+        parnames = ['Amplitude', 'Frequency (Hz)', 'Phi (deg)', 'Offset']
         for par, name, err in zip(params, parnames, param_errs):
             print "{} : {} +/- {}".format(name, par, err)
 
@@ -814,6 +811,15 @@ def decaysin(x, *p):
     :return: p[0]*np.sin(2.*np.pi*p[1]*x+p[2]*np.pi/180.)*np.e**(-1.*(x-p[5])/p[3])+p[4]
     """
     return p[0]*np.sin(2.*np.pi*p[1]*x+p[2]*np.pi/180.)*np.e**(-1.*(x-p[5])/p[3])+p[4]
+
+def sinfunc(x, *p):
+    """
+    Sine function
+    :param p: [Amplitude, Frequency (Hz), Phi (deg), Offset]
+    :param x: Time points
+    :return: p[0]*np.sin(2.*np.pi*p[1]*x+p[2]*np.pi/180.)+p[3]
+    """
+    return p[0]*np.sin(2.*np.pi*p[1]*x+p[2]*np.pi/180.)+p[3]
 
 def hangerfunc(x, *p):
     """
