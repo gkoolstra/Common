@@ -104,7 +104,6 @@ def fit_lor(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartf
     :param showfit: True/False
     :param showstartfit: True/False
     :param label: String
-    :param debug:
     :param verbose: Prints the fit results
     :return: [fitresult, fiterrors] if successful
     """
@@ -119,10 +118,9 @@ def fit_lor(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartf
         fitparams[1]=max(fitdatay)-min(fitdatay)
         fitparams[2]=fitdatax[np.argmax(fitdatay)]
         fitparams[3]=(max(fitdatax)-min(fitdatax))/10.
-    if debug==True: print fitparams
 
     params, param_errs = fitbetter(fitdatax, fitdatay, lorfunc, fitparams, domain=None, showfit=showfit,
-                                   showstartfit=showstartfit, label=label, show_diagnostics=True, **kwarg)
+                                   showstartfit=showstartfit, label=label, **kwarg)
 
     if verbose:
         parnames = ['offset', 'amplitude', 'f0', 'HWHM']
@@ -147,7 +145,6 @@ def fit_kinetic_fraction(xdata, ydata, fitparams=None, Tc_fixed=False, domain=No
     :param showfit: True/False
     :param showstartfit: True/False
     :param label: String
-    :param debug: True/False
     :return: List of optimal fitparameters (if successful) / None (if not successful)
     """
     if domain is not None:
@@ -183,7 +180,6 @@ def fit_double_lor(xdata, ydata, fitparams=None, domain=None, showfit=False, sho
     :param showfit: True/False
     :param showstartfit: True/False
     :param label: String
-    :param debug: True/False
     :return: List of optimal fitparameters (if successful) / None (if not successful)
     """
 
@@ -197,7 +193,7 @@ def fit_double_lor(xdata, ydata, fitparams=None, domain=None, showfit=False, sho
         print "Please provide some initial guesses."
 
     params, param_errs = fitbetter(fitdatax, fitdatay, twolorfunc, fitparams, domain=None, showfit=showfit,
-                                   showstartfit=showstartfit, label=label, no_offset=False)
+                                   showstartfit=showstartfit, label=label)
 
     if verbose:
         parnames = ['offset', 'A1', 'f1', 'HWHM1', 'A2', 'f2', 'HWHM2']
@@ -219,7 +215,6 @@ def fit_N_gauss(xdata, ydata, fitparams=None, domain=None, showfit=False, showst
     :param showfit: True/False
     :param showstartfit: True/False
     :param label: String
-    :param debug: True/False
     :param no_offset: True/False
     :return: Optimal fit result (if successful).
     """
@@ -492,7 +487,6 @@ def fit_parabola(xdata, ydata, fitparams=None, domain=None, showfit=False, shows
     :param showfit: True/False
     :param showstartfit: True/False
     :param label: String
-    :param debug: True/False
     :param verbose: True/False, prints the fitresult
     :return: Fitresult, Fiterror
     """
@@ -520,7 +514,7 @@ def fit_parabola(xdata, ydata, fitparams=None, domain=None, showfit=False, shows
     return params, param_errs
 
 def fit_s11(xdata, ydata, mode='oneport', fitparams=None, domain=None, showfit=False, showstartfit=False,
-            label="", debug=False, verbose=True, **kwarg):
+            label="", verbose=True, **kwarg):
     """
     Fit a S11 curve. Uses s11_mag_func_asymmetric. Note: fits the voltage signal, not a power (i.e. use this function
     to fit |S11| instead of |S11|**2. Note Qi = f0/(2*eps), Qc = f0/kr.
@@ -531,7 +525,6 @@ def fit_s11(xdata, ydata, mode='oneport', fitparams=None, domain=None, showfit=F
     :param showfit: True/False
     :param showstartfit: True/False
     :param label: String
-    :param debug: True/False
     :param verbose: True/False, prints the fitresults
     :return: Fitresult, Fiterror
     """
@@ -576,7 +569,7 @@ def fit_s11(xdata, ydata, mode='oneport', fitparams=None, domain=None, showfit=F
     return params, param_errs
 
 def fit_fano(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False,
-             label="", debug=False, verbose=True, **kwarg):
+             label="", verbose=True, **kwarg):
     """
     Fit a fano lineshape. Uses fano_func.
     :param xdata: Frequency points
@@ -586,7 +579,6 @@ def fit_fano(xdata, ydata, fitparams=None, domain=None, showfit=False, showstart
     :param showfit: True/False
     :param showstartfit: True/False
     :param label: String
-    :param debug: True/False
     :param verbose: True/False. Prints the fitresult
     :return: Fitresult, Fiterror
     """
@@ -602,8 +594,6 @@ def fit_fano(xdata, ydata, fitparams=None, domain=None, showfit=False, showstart
         fitparams[1]=(max(fitdatax)-min(fitdatax))/10.
         fitparams[2]=10.
 
-    if debug==True: print fitparams
-
     params, param_errs = fitbetter(fitdatax, fitdatay, fano_func, fitparams, domain=None, showfit=showfit,
                                    showstartfit=showstartfit, label=label, show_diagnostics=True, **kwarg)
 
@@ -615,7 +605,7 @@ def fit_fano(xdata, ydata, fitparams=None, domain=None, showfit=False, showstart
     return params, param_errs
 
 def fit_lor_asym(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False,
-                 label="", debug=False, verbose=True, **kwarg):
+                 label="", verbose=True, **kwarg):
     """
     Fit asymmetric lorentzian lineshape, derived from a capacitor in series with the LC circuit. Uses asym_lorfunc.
     See also fit_fano
@@ -626,7 +616,6 @@ def fit_lor_asym(xdata, ydata, fitparams=None, domain=None, showfit=False, shows
     :param showfit: True/False
     :param showstartfit: True/False
     :param label: String
-    :param debug: True/False
     :param verbose: True/False. Prints the fitresult.
     :return: Fitresult, Fiterror
     """
@@ -642,8 +631,6 @@ def fit_lor_asym(xdata, ydata, fitparams=None, domain=None, showfit=False, shows
         fitparams[1]=(max(fitdatax)-min(fitdatax))/10.
         fitparams[2]=fitparams[0]/10.
 
-    if debug==True: print fitparams
-
     params, param_errs = fitbetter(fitdatax, fitdatay, asym_lorfunc, fitparams, domain=None, showfit=showfit,
                     showstartfit=showstartfit, label=label, show_diagnostics=True, **kwarg)
 
@@ -655,7 +642,7 @@ def fit_lor_asym(xdata, ydata, fitparams=None, domain=None, showfit=False, shows
     return params, param_errs
 
 def fit_poly(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False,
-            label="", debug=False, verbose=True, **kwarg):
+            label="", verbose=True, **kwarg):
     """
     Fit a polynomial. Uses polyfunc_v2. Specify fitparams as [p0, p1, p2, ...] where
     y = p0 + p1*x + p2*x**2 + ...
@@ -666,7 +653,6 @@ def fit_poly(xdata, ydata, fitparams=None, domain=None, showfit=False, showstart
     :param showfit: True/False
     :param showstartfit: True/False
     :param label: String
-    :param debug: True/False
     :param verbose: True/False. Prints the fitresults.
     :return: Fitresult, Fiterror
     """
