@@ -123,9 +123,9 @@ def fit_lor(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartf
                                    showstartfit=showstartfit, label=label, **kwarg)
 
     if verbose:
-        parnames = ['offset', 'amplitude', 'f0', 'HWHM']
+        parnames = ['Offset', 'Amplitude', 'f0', 'HWHM']
         print tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
-                       tablefmt="rst", floatfmt=".6f", numalign="center", stralign='left')
+                       tablefmt="rst", floatfmt="", numalign="center", stralign='left')
 
     # Make sure the hwhm is positive
     params[3]=abs(params[3])
@@ -163,7 +163,7 @@ def fit_kinetic_fraction(xdata, ydata, fitparams=None, Tc_fixed=False, domain=No
                                    showstartfit=showstartfit, label=label, **kwarg)
 
     if verbose:
-        parnames = ['f0', 'alpha', 'Tc']
+        parnames = ['f0', 'Kinetic Inductance fraction', 'Tc']
         for par, name, err in zip(params, parnames, param_errs):
             print "{} : {} +/- {}".format(name, par, err)
 
@@ -196,7 +196,7 @@ def fit_double_lor(xdata, ydata, fitparams=None, domain=None, showfit=False, sho
                                    showstartfit=showstartfit, label=label)
 
     if verbose:
-        parnames = ['offset', 'A1', 'f1', 'HWHM1', 'A2', 'f2', 'HWHM2']
+        parnames = ['Offset', 'A1', 'f1', 'HWHM1', 'A2', 'f2', 'HWHM2']
         for par, name, err in zip(params, parnames, param_errs):
             print "{} : {} +/- {}".format(name, par, err)
 
@@ -470,7 +470,7 @@ def fit_hanger(xdata, ydata, fitparams=None, domain=None, showfit=False, showsta
     if verbose:
         parnames = ['f0', 'Qi', 'Qc', 'df', 'scale']
         for par, name, err in zip(params, parnames, param_errs):
-            print "{} : {} +/- {}".format(name, par, err)
+            print "{:.6f} : {:.6f} +/- {:.6f}".format(name, par, err)
 
     return params, param_errs
 
