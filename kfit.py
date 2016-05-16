@@ -125,7 +125,7 @@ def fit_lor(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartf
     if verbose:
         parnames = ['offset', 'amplitude', 'f0', 'HWHM']
         print tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
-                       tablefmt="rst", floatfmt=".6f", numalign="center", stralign='left')
+                       tablefmt="rst", floatfmt="6.0f", numalign="center", stralign='left')
 
     # Make sure the hwhm is positive
     params[3]=abs(params[3])
