@@ -336,8 +336,9 @@ def fit_decaysin(xdata, ydata, fitparams=None, domain=None, showfit=False, shows
         fitparams[2]=(cmath.phase(fft_val)-np.pi/2.)*180./np.pi
         fitparams[3]=(max(fitdatax)-min(fitdatax))
 
-    decaysin3=lambda p,x: p[0]*np.sin(2.*np.pi*p[1]*x+p[2]*np.pi/180.)*np.e**(-1.*(x-fitdatax[0])/p[3])+p[4]
-    params, param_errs = fitbetter(fitdatax, fitdatay, decaysin3, fitparams, domain=None, showfit=showfit,
+    #decaysin3=lambda p,x: p[0]*np.sin(2.*np.pi*p[1]*x+p[2]*np.pi/180.)*np.e**(-1.*(x-fitdatax[0])/p[3])+p[4]
+
+    params, param_errs = fitbetter(fitdatax, fitdatay, decaysin, fitparams, domain=None, showfit=showfit,
                                    showstartfit=showstartfit, label=label)
 
     if verbose:
