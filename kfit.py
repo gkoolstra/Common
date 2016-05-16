@@ -501,7 +501,7 @@ def fit_parabola(xdata, ydata, fitparams=None, domain=None, showfit=False, shows
         fitdatay=ydata
 
     params, param_errs = fitbetter(fitdatax, fitdatay, parabolafunc, fitparams, domain=None, showfit=showfit,
-                                   showstartfit=showstartfit, label=label, show_diagnostics=True, **kwarg)
+                                   showstartfit=showstartfit, label=label, **kwarg)
 
     if verbose:
         idx = 0
@@ -551,11 +551,11 @@ def fit_s11(xdata, ydata, mode='oneport', fitparams=None, domain=None, showfit=F
 
     if mode == 'oneport':
         params, param_errs = fitbetter(fitdatax, fitdatay, s11_mag_func_asymmetric, fitparams, domain=None, showfit=showfit,
-                                       showstartfit=showstartfit, label=label, show_diagnostics=True, **kwarg)
+                                       showstartfit=showstartfit, label=label, **kwarg)
         names = ['f0', 'kr', 'eps', 'df', 'scale']
     else:
         params, param_errs = fitbetter(fitdatax, fitdatay, s11_mag_twoport, fitparams, domain=None, showfit=showfit,
-                                       showstartfit=showstartfit, label=label, show_diagnostics=True, **kwarg)
+                                       showstartfit=showstartfit, label=label, **kwarg)
         names = ['f0', 'Qc', 'Qi', 'df', 'scale']
 
     if verbose:
@@ -595,7 +595,7 @@ def fit_fano(xdata, ydata, fitparams=None, domain=None, showfit=False, showstart
         fitparams[2]=10.
 
     params, param_errs = fitbetter(fitdatax, fitdatay, fano_func, fitparams, domain=None, showfit=showfit,
-                                   showstartfit=showstartfit, label=label, show_diagnostics=True, **kwarg)
+                                   showstartfit=showstartfit, label=label, **kwarg)
 
     if verbose:
         parnames = ['f0', 'FWHM', 'Fano factor', 'Amplitude']
@@ -632,7 +632,7 @@ def fit_lor_asym(xdata, ydata, fitparams=None, domain=None, showfit=False, shows
         fitparams[2]=fitparams[0]/10.
 
     params, param_errs = fitbetter(fitdatax, fitdatay, asym_lorfunc, fitparams, domain=None, showfit=showfit,
-                    showstartfit=showstartfit, label=label, show_diagnostics=True, **kwarg)
+                    showstartfit=showstartfit, label=label, **kwarg)
 
     if verbose:
         parnames = ['f0', 'FWHM', 'Gamma', 'Amplitude']
@@ -667,7 +667,7 @@ def fit_poly(xdata, ydata, fitparams=None, domain=None, showfit=False, showstart
         fitdatay = ydata
 
     params, param_errs = fitbetter(fitdatax, fitdatay, polyfunc, fitparams, domain=None, showfit=showfit,
-                                   showstartfit=showstartfit, label=label, show_diagnostics=True, **kwarg)
+                                   showstartfit=showstartfit, label=label, **kwarg)
 
     idx = 0
     if verbose:
