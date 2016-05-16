@@ -122,7 +122,6 @@ def get_phase(array):
     phase_out = np.zeros([len(array)])
     for idx,k in enumerate(array):
         phase_out[idx] = cmath.phase(k)
-
     return phase_out
 
 #######################################################################
@@ -131,7 +130,7 @@ def get_phase(array):
 #######################################################################
 #######################################################################
 
-def fitlor(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False,
+def fit_lor(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False,
            label="", debug=False, verbose=True,**kwarg):
     """
     Fit a Lorentzian; returns
@@ -160,20 +159,18 @@ def fitlor(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfi
         fitparams[3]=(max(fitdatax)-min(fitdatax))/10.
     if debug==True: print fitparams
 
-    p1, p1_errors = fitbetter(fitdatax,fitdatay,lorfunc_better,fitparams,domain=None,showfit=showfit,
-                    showstartfit=showstartfit,label=label,show_diagnostics=True,**kwarg)
+    params, param_errs = fitbetter(fitdatax, fitdatay, lorfunc, fitparams, domain=None, showfit=showfit,
+                              showstartfit=showstartfit, label=label, show_diagnostics=True, **kwarg)
 
     if verbose:
         parnames = ['offset', 'amplitude', 'center', 'hwhm']
-        for par, name, err in zip(p1, parnames, p1_errors):
+        for par, name, err in zip(params, parnames, param_errs):
             print "%s : %.6f +/- %.6f"%(name, par, err)
 
-    try:
-        p1[3]=abs(p1[3])
-    except:
-        p1[0][3]=abs(p1[0][3])
+    # Make sure the hwhm is positive
+    params[3]=abs(params[3])
 
-    return p1, p1_errors
+    return params, param_errs
 
 def fit_kinetic_fraction(xdata, ydata, fitparams=None, Tc_fixed=False, domain=None, showfit=False, showstartfit=False,
                          label="", debug=False, **kwarg):
@@ -203,9 +200,9 @@ def fit_kinetic_fraction(xdata, ydata, fitparams=None, Tc_fixed=False, domain=No
     if Tc_fixed:
         fitparams=fitparams[:2]
 
-    p1 = fitgeneral(fitdatax, fitdatay, kinfunc, fitparams, domain=None, showfit=showfit, 
-            showstartfit=showstartfit, label=label, **kwarg)
-    return p1
+    params, param_errs = fitbetter(fitdatax, fitdatay, kinfunc, fitparams, domain=None, showfit=showfit,
+                                   showstartfit=showstartfit, label=label, **kwarg)
+    return params, param_errs
 
 def fit_double_lor(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False,
                    label="", debug=False, **kwarg):
@@ -231,9 +228,9 @@ def fit_double_lor(xdata, ydata, fitparams=None, domain=None, showfit=False, sho
     if fitparams is None:
         print "Please provide some initial guesses."
 
-    p1 = fitgeneral(fitdatax, fitdatay, twolorfunc, fitparams, domain=None, showfit=showfit,
-            showstartfit=showstartfit, label=label, no_offset = False)
-    return p1
+    params, param_errs = fitbetter(fitdatax, fitdatay, twolorfunc, fitparams, domain=None, showfit=showfit,
+                                   showstartfit=showstartfit, label=label, no_offset=False)
+    return params, param_errs
 
 def fit_N_gauss(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False,
                 label="", debug=False, no_offset=False, **kwarg):
@@ -262,14 +259,14 @@ def fit_N_gauss(xdata, ydata, fitparams=None, domain=None, showfit=False, showst
         print "Please provide some initial guesses."
 
     if no_offset:
-        p1 = fitgeneral(fitdatax, fitdatay, Ngaussfunc_no_offset, fitparams, domain=None, showfit=showfit,
-                showstartfit=showstartfit, label=label, **kwarg)
+        params, param_errs = fitbetter(fitdatax, fitdatay, Ngaussfunc_no_offset, fitparams, domain=None, showfit=showfit,
+                                       showstartfit=showstartfit, label=label, **kwarg)
     else:
-        p1 = fitgeneral(fitdatax, fitdatay, Ngaussfunc, fitparams, domain=None, showfit=showfit,
-                showstartfit=showstartfit, label=label, **kwarg)
-    return p1
+        params, param_errs = fitbetter(fitdatax, fitdatay, Ngaussfunc, fitparams, domain=None, showfit=showfit,
+                                       showstartfit=showstartfit, label=label, **kwarg)
+    return params, param_errs
 
-def fitexp(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False, label=""):
+def fit_exp(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False, label=""):
     """
     Fit exponential decay of the form (p[0]+p[1]*exp(-(x-p[2])/p[3])). Uses expfunc.
     :param xdata: x-data
@@ -293,10 +290,11 @@ def fitexp(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfi
         fitparams[1]=fitdatay[0]-fitdatay[-1]
         fitparams[2]=fitdatax[0]
         fitparams[3]=(fitdatax[-1]-fitdatax[0])/5.
-    p1 = fitgeneral(fitdatax,fitdatay,expfunc,fitparams,domain=None,showfit=showfit,showstartfit=showstartfit,label=label)
-    return p1
+    params, param_errs = fitbetter(fitdatax, fitdatay, expfunc, fitparams, domain=None, showfit=showfit,
+                                   showstartfit=showstartfit, label=label)
+    return params, param_errs
 
-def fitpulse_err(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False, label=""):
+def fit_pulse_err(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False, label=""):
     """
     Fit pulse error decay (p[0]+p[1]*(1-p[2])^x). Uses pulse_errfunc
     :param xdata: x-data
@@ -319,10 +317,11 @@ def fitpulse_err(xdata, ydata, fitparams=None, domain=None, showfit=False, shows
         fitparams[1]=fitdatay[0]-fitdatay[-1]
         fitparams[1]=fitdatay[0]-fitdatay[-1]
 
-    p1 = fitgeneral(fitdatax,fitdatay,pulse_errfunc,fitparams,domain=None,showfit=showfit,showstartfit=showstartfit,label=label)
-    return p1
+    params, param_errs = fitbetter(fitdatax, fitdatay, pulse_errfunc, fitparams, domain=None, showfit=showfit,
+                                   showstartfit=showstartfit, label=label)
+    return params, param_errs
 
-def fitdecaysin(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False, label=""):
+def fit_decaysin(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False, label=""):
     """
     Fits decaying sine wave of form: p[0]*np.sin(2.*pi*p[1]*x+p[2]*pi/180.)*np.e**(-1.*(x-p[5])/p[3])+p[4]
     :param xdata: x-data
@@ -347,16 +346,17 @@ def fitdecaysin(xdata, ydata, fitparams=None, domain=None, showfit=False, showst
 
         fitparams=[0,0,0,0,0]
         fitparams[4]=np.mean(fitdatay)
-        fitparams[0]=(max(fitdatay)-min(fitdatay))/2.#2*abs(fft_val)/len(fitdatay)
+        fitparams[0]=(max(fitdatay)-min(fitdatay))/2.
         fitparams[1]=fft_freqs[max_ind]
         fitparams[2]=(cmath.phase(fft_val)-np.pi/2.)*180./np.pi
         fitparams[3]=(max(fitdatax)-min(fitdatax))
 
     decaysin3=lambda p,x: p[0]*np.sin(2.*np.pi*p[1]*x+p[2]*np.pi/180.)*np.e**(-1.*(x-fitdatax[0])/p[3])+p[4]
-    p1 = fitgeneral(fitdatax,fitdatay,decaysin3,fitparams,domain=None,showfit=showfit,showstartfit=showstartfit,label=label)
-    return p1
+    params, param_errs = fitbetter(fitdatax, fitdatay, decaysin3, fitparams, domain=None, showfit=showfit,
+                                   showstartfit=showstartfit, label=label)
+    return params, param_errs
 
-def fitsin(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False, label=""):
+def fit_sin(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False, label=""):
     """
     Fits sin wave of form: p[0]*np.sin(2.*pi*p[1]*x+p[2]*pi/180.)+p[3].
     :param xdata: x-data
@@ -386,10 +386,11 @@ def fitsin(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfi
         fitparams[2]=(cmath.phase(fft_val)-np.pi/2.)*180./np.pi
 
     sin2=lambda p,x: p[0]*np.sin(2.*np.pi*p[1]*x+p[2]*np.pi/180.)+p[3]
-    p1 = fitgeneral(fitdatax,fitdatay,sin2,fitparams,domain=None,showfit=showfit,showstartfit=showstartfit,label=label)
-    return p1
+    params, param_errs = fitbetter(fitdatax, fitdatay, sin2, fitparams, domain=None, showfit=showfit,
+                                   showstartfit=showstartfit, label=label)
+    return params, param_errs
 
-def fitgauss(xdata, ydata, fitparams=None, no_offset=False, domain=None, showfit=False, showstartfit=False, label=""):
+def fit_gauss(xdata, ydata, fitparams=None, no_offset=False, domain=None, showfit=False, showstartfit=False, label=""):
     """
     Fit a gaussian. You can choose to include an offset, using no_offset=True/False. Adjust fitparams accordingly:
     no_offset = True:   p[1] exp(- (x-p[2])**2/p[3]**2/2) (uses gaussfunc_nooffset)
@@ -423,10 +424,11 @@ def fitgauss(xdata, ydata, fitparams=None, no_offset=False, domain=None, showfit
     else:
         fitfunc = gaussfunc
 
-    p1 = fitgeneral(fitdatax,fitdatay,fitfunc,fitparams,domain=None,showfit=showfit,showstartfit=showstartfit,label=label)
-    return p1
+    params, param_errs = fitbetter(fitdatax, fitdatay, fitfunc, fitparams, domain=None, showfit=showfit,
+                                   showstartfit=showstartfit, label=label)
+    return params, param_errs
 
-def fithanger(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False, printresult=False,
+def fit_hanger(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False, printresult=False,
               label="", mark_data='bo', mark_fit='r-'):
     """
     Fit Hanger Transmission (S21) data taking into account asymmetry. Uses hangerfunc.
@@ -445,25 +447,26 @@ def fithanger(xdata, ydata, fitparams=None, domain=None, showfit=False, showstar
     if domain is not None:
         fitdatax,fitdatay = selectdomain(xdata,ydata,domain)
     else:
-        fitdatax=xdata
-        fitdatay=ydata
+        fitdatax = xdata
+        fitdatay = ydata
     if fitparams is None:
-        peakloc=np.argmin(fitdatay)
-        ymax=(fitdatay[0]+fitdatay[-1])/2.
-        ymin=fitdatay[peakloc]
-        f0=fitdatax[peakloc]
-        Q0=abs(fitdatax[peakloc]/((max(fitdatax)-min(fitdatax))/3.))
-        scale= ymax
-        Qi=Q0*(1.+ymax)
-        Qc=Qi/(ymax)
-        fitparams=[f0,abs(Qi),abs(Qc),0.,scale]
-    fitresult=fitgeneral(fitdatax, fitdatay, hangerfunc, fitparams, domain=domain, showfit=showfit,
-                         showstartfit=showstartfit, label=label, mark_data=mark_data, mark_fit=mark_fit)
-    if printresult: print '-- Fit Result --\nf0: {0}\nQi: {1}\nQc: {2}\ndf: {3}\nScale: {4}'.format(fitresult[0],fitresult[1],fitresult[2],fitresult[3],fitresult[4])
-    return fitresult
+        peakloc = np.argmin(fitdatay)
+        ymax = (fitdatay[0]+fitdatay[-1])/2.
+        ymin = fitdatay[peakloc]
+        f0 = fitdatax[peakloc]
+        Q0 = abs(fitdatax[peakloc]/((max(fitdatax)-min(fitdatax))/3.))
+        scale = ymax
+        Qi = Q0*(1.+ymax)
+        Qc = Qi/(ymax)
+        fitparams = [f0, abs(Qi), abs(Qc), 0., scale]
+
+    params, param_errs = fitbetter(fitdatax, fitdatay, hangerfunc, fitparams, domain=domain, showfit=showfit,
+                                   showstartfit=showstartfit, label=label, mark_data=mark_data, mark_fit=mark_fit)
+
+    return params, param_errs
 
 def fit_parabola(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False,
-            label="", debug=False, verbose=True, **kwarg):
+                 label="", debug=False, verbose=True, **kwarg):
     """
     Fit a parabola. Uses parabolafunc. Specify fitparams as [p0, p1, p2] where y = p0 + p1*(x-p2)**2
     :param xdata: x-data
@@ -487,18 +490,18 @@ def fit_parabola(xdata, ydata, fitparams=None, domain=None, showfit=False, shows
         fitdatax=xdata
         fitdatay=ydata
 
-    p1, p1err = fitbetter(fitdatax, fitdatay, parabolafunc, fitparams, domain=None, showfit=showfit,
-                    showstartfit=showstartfit, label=label, show_diagnostics=True, **kwarg)
+    params, param_errs = fitbetter(fitdatax, fitdatay, parabolafunc, fitparams, domain=None, showfit=showfit,
+                                   showstartfit=showstartfit, label=label, show_diagnostics=True, **kwarg)
 
     if verbose:
         idx = 0
         print "Fit results for y = a0 + a1*(x-a2)**2 with 1 sigma confidence intervals"
         print "---------------------------------------------------------------------"
-        for P, errP in zip(p1, p1err):
+        for P, errP in zip(params, param_errs):
             print "a{} = {} +/- {}".format(idx, P, errP)
             idx+=1
 
-    return p1, p1err
+    return params, param_errs
 
 def fit_s11(xdata, ydata, mode='oneport', fitparams=None, domain=None, showfit=False, showstartfit=False,
             label="", debug=False, verbose=True, **kwarg):
@@ -516,7 +519,6 @@ def fit_s11(xdata, ydata, mode='oneport', fitparams=None, domain=None, showfit=F
     :param verbose: True/False, prints the fitresults
     :return: Fitresult, Fiterror
     """
-
     if domain is not None:
         fitdatax,fitdatay = selectdomain(xdata,ydata,domain)
     else:
@@ -539,23 +541,23 @@ def fit_s11(xdata, ydata, mode='oneport', fitparams=None, domain=None, showfit=F
         fitparams = [f0_guess, Qc_guess, Qi_guess, df_guess, scale_guess]
 
     if mode == 'oneport':
-        p1, p1err = fitbetter(fitdatax, fitdatay, s11_mag_func_asymmetric, fitparams, domain=None, showfit=showfit,
-                        showstartfit=showstartfit, label=label, show_diagnostics=True, **kwarg)
+        params, param_errs = fitbetter(fitdatax, fitdatay, s11_mag_func_asymmetric, fitparams, domain=None, showfit=showfit,
+                                       showstartfit=showstartfit, label=label, show_diagnostics=True, **kwarg)
         names = ['f0', 'kr', 'eps', 'df', 'scale']
     else:
-        p1, p1err = fitbetter(fitdatax, fitdatay, s11_mag_twoport, fitparams, domain=None, showfit=showfit,
-                        showstartfit=showstartfit, label=label, show_diagnostics=True, **kwarg)
+        params, param_errs = fitbetter(fitdatax, fitdatay, s11_mag_twoport, fitparams, domain=None, showfit=showfit,
+                                       showstartfit=showstartfit, label=label, show_diagnostics=True, **kwarg)
         names = ['f0', 'Qc', 'Qi', 'df', 'scale']
 
     if verbose:
         idx = 0
         print "Fit results for S11 func with 1 sigma confidence intervals"
         print "---------------------------------------------------------------------"
-        for P, errP in zip(p1, p1err):
+        for P, errP in zip(params, param_errs):
             print "{} = {} +/- {}".format(names[idx], P, errP)
             idx+=1
 
-    return p1, p1err
+    return params, param_errs
 
 def fit_fano(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False,
              label="", debug=False, verbose=True, **kwarg):
@@ -579,7 +581,6 @@ def fit_fano(xdata, ydata, fitparams=None, domain=None, showfit=False, showstart
         fitdatay=ydata
     if fitparams is None:
         fitparams=[0,0,0,0]
-        #fitparams[4]=(fitdatay[0]+fitdatay[-1])/2.
         fitparams[3]=max(fitdatay)-min(fitdatay)
         fitparams[0]=fitdatax[np.argmax(fitdatay)]
         fitparams[1]=(max(fitdatax)-min(fitdatax))/10.
@@ -587,18 +588,18 @@ def fit_fano(xdata, ydata, fitparams=None, domain=None, showfit=False, showstart
 
     if debug==True: print fitparams
 
-    p1, p1_errors = fitbetter(fitdatax,fitdatay,fano_func,fitparams,domain=None,showfit=showfit,
-                    showstartfit=showstartfit,label=label,show_diagnostics=True,**kwarg)
+    params, param_errs = fitbetter(fitdatax, fitdatay, fano_func, fitparams, domain=None, showfit=showfit,
+                                   showstartfit=showstartfit, label=label, show_diagnostics=True, **kwarg)
 
     if verbose:
         parnames = ['f0', 'FWHM', 'Fano factor', 'Amplitude']
-        for par, name, err in zip(p1, parnames, p1_errors):
+        for par, name, err in zip(params, parnames, param_errs):
             print "%s : %.6f +/- %.6f"%(name, par, err)
 
-    return p1, p1_errors
+    return params, param_errs
 
-def fitlor_asym(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False,
-                label="", debug=False, verbose=True, **kwarg):
+def fit_lor_asym(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False,
+                 label="", debug=False, verbose=True, **kwarg):
     """
     Fit asymmetric lorentzian lineshape, derived from a capacitor in series with the LC circuit. Uses asym_lorfunc.
     See also fit_fano
@@ -620,7 +621,6 @@ def fitlor_asym(xdata, ydata, fitparams=None, domain=None, showfit=False, showst
         fitdatay=ydata
     if fitparams is None:
         fitparams=[0,0,0,0]
-        #fitparams[4]=(fitdatay[0]+fitdatay[-1])/2.
         fitparams[3]=max(fitdatay)-min(fitdatay)
         fitparams[0]=fitdatax[np.argmax(fitdatay)]
         fitparams[1]=(max(fitdatax)-min(fitdatax))/10.
@@ -628,17 +628,17 @@ def fitlor_asym(xdata, ydata, fitparams=None, domain=None, showfit=False, showst
 
     if debug==True: print fitparams
 
-    p1, p1_errors = fitbetter(fitdatax,fitdatay,asym_lorfunc,fitparams,domain=None,showfit=showfit,
-                    showstartfit=showstartfit,label=label,show_diagnostics=True,**kwarg)
+    params, param_errs = fitbetter(fitdatax, fitdatay, asym_lorfunc, fitparams, domain=None, showfit=showfit,
+                    showstartfit=showstartfit, label=label, show_diagnostics=True, **kwarg)
 
     if verbose:
         parnames = ['f0', 'FWHM', 'Gamma', 'Amplitude']
-        for par, name, err in zip(p1, parnames, p1_errors):
+        for par, name, err in zip(params, parnames, param_errs):
             print "%s : %.6f +/- %.6f"%(name, par, err)
 
-    return p1, p1_errors
+    return params, param_errs
 
-def fitpoly(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False,
+def fit_poly(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False,
             label="", debug=False, verbose=True, **kwarg):
     """
     Fit a polynomial. Uses polyfunc_v2. Specify fitparams as [p0, p1, p2, ...] where
@@ -661,21 +661,21 @@ def fitpoly(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartf
     if domain is not None:
         fitdatax,fitdatay = selectdomain(xdata,ydata,domain)
     else:
-        fitdatax=xdata
-        fitdatay=ydata
+        fitdatax = xdata
+        fitdatay = ydata
 
-    p1, p1err = fitbetter(fitdatax, fitdatay, polyfunc_v2, fitparams, domain=None, showfit=showfit,
-                    showstartfit=showstartfit, label=label, show_diagnostics=True, **kwarg)
+    params, param_errs = fitbetter(fitdatax, fitdatay, polyfunc_v2, fitparams, domain=None, showfit=showfit,
+                                   showstartfit=showstartfit, label=label, show_diagnostics=True, **kwarg)
 
     idx = 0
     if verbose:
         print "Fit results for y = a0 + a1*x + ... with 1 sigma confidence intervals"
         print "---------------------------------------------------------------------"
-        for P, errP in zip(p1, p1err):
+        for P, errP in zip(params, param_errs):
             print "a{} = {} +/- {}".format(idx, P, errP)
             idx+=1
 
-    return p1, p1err
+    return params, param_errs
 
 ###########################################################
 ###########################################################
@@ -683,19 +683,7 @@ def fitpoly(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartf
 ###########################################################
 ###########################################################
 
-def lorfunc_better(x, offset, amplitude, center, hwhm):
-    """
-    Lorentzian with offset, compatible with fitbetter functionality.
-    :param x: Frequency points
-    :param offset: Power offset
-    :param amplitude: Peak amplitude
-    :param center: Frequency center
-    :param hwhm: FWHM/2
-    :return: offset+amplitude/(1+(x-center)**2/hwhm**2)
-    """
-    return offset+amplitude/(1+(x-center)**2/hwhm**2)
-
-def lorfunc(p, x):
+def lorfunc(x, *p):
     """
     Lorentzian with offset, for use with fitgeneral functionality.
     :param p: [offset, peak amplitude, center, hwhm/2]
@@ -704,7 +692,7 @@ def lorfunc(p, x):
     """
     return p[0]+p[1]/(1+(x-p[2])**2/p[3]**2)
 
-def kinfunc(p, x):
+def kinfunc(x, *p):
     """
     Function describing a resonance frequency due to kinetic inductance as function of temperature.
     :param p: [f0, alpha, Tc] or [f0, alpha]
@@ -722,7 +710,7 @@ def kinfunc(p, x):
 
     return f0*(1-alpha/2.*1/(1-(x/Tc)**4))
 
-def twolorfunc(p, x):
+def twolorfunc(x, *p):
     """
     :param p: [offset, amplitude 1, center 1, hwhm 1, amplitude 2, center 2, hwhm 2]
     :param x: Frequency points
@@ -757,7 +745,7 @@ def print_cavity_Q(fit):
     print fit[2]/2/fit[3]
     return fit[2]/2/fit[3]
 
-def gaussfunc(p, x):
+def gaussfunc(x, *p):
     """
     Gaussian function, including an offset
     :param p: [offset, amplitude, center, standard deviation]
@@ -765,7 +753,7 @@ def gaussfunc(p, x):
     """
     return p[0]+p[1]*math.e**(-1./2.*(x-p[2])**2/p[3]**2)
 
-def gaussfunc_nooffset(p, x):
+def gaussfunc_nooffset(x, *p):
     """
     Gaussian function, no offset
     :param p: [amplitude, center, standard deviation]
@@ -773,7 +761,7 @@ def gaussfunc_nooffset(p, x):
     """
     return p[0]*math.e**(-1./2.*(x-p[1])**2/p[2]**2)
 
-def Ngaussfunc(p, x):
+def Ngaussfunc(x, *p):
     """
     Gaussian function with N peaks, including an offset
     :param p: [offset, A1, f1, sigma1, A2, f2, sigma2, ...]
@@ -785,7 +773,7 @@ def Ngaussfunc(p, x):
         Ngauss += p[3*n+1]*math.e**(-1./2.*(x-p[3*n+2])**2/p[3*n+3]**2)
     return Ngauss
 
-def Ngaussfunc_no_offset(p, x):
+def Ngaussfunc_no_offset(x, *p):
     """
     Gaussian function with N peaks, no offset
     :param p: [A1, f1, sigma1, A2, f2, sigma2, ...]
@@ -797,7 +785,7 @@ def Ngaussfunc_no_offset(p, x):
         Ngauss += p[3*n+1]*math.e**(-1./2.*(x-p[3*n+2])**2/p[3*n+3]**2)
     return Ngauss
 
-def expfunc(p, x):
+def expfunc(x, *p):
     """
     Exponential function, including an offset
     :param p: [offset, amplitude, t0, tau]
@@ -806,7 +794,7 @@ def expfunc(p, x):
     """
     return p[0]+p[1]*math.e**(-(x-p[2])/p[3])
 
-def pulse_errfunc(p, x):
+def pulse_errfunc(x, *p):
     """
     Pulse error function
     :param p: [offset, ?]
@@ -815,7 +803,7 @@ def pulse_errfunc(p, x):
     """
     return p[0]+0.5*(1-((1-p[1])**x))
 
-def decaysin(p, x):
+def decaysin(x, *p):
     """
     Exponential decaying sine function.
     :param p: [A, f, phi (deg), tau, offset, t0]
@@ -824,7 +812,7 @@ def decaysin(p, x):
     """
     return p[0]*np.sin(2.*np.pi*p[1]*x+p[2]*np.pi/180.)*np.e**(-1.*(x-p[5])/p[3])+p[4]
 
-def hangerfunc(p, x):
+def hangerfunc(x, *p):
     """
     Hanger function
     :param p: [f0, Qi, Qc, df, scale]
@@ -837,7 +825,7 @@ def hangerfunc(p, x):
     Q0=1./(1./Qi+1./Qc)
     return scale*(-2.*Q0*Qc + Qc**2. + Q0**2.*(1. + Qc**2.*(2.*a + b)**2.))/(Qc**2*(1. + 4.*Q0**2.*a**2.))
 
-def polynomial(p, x):
+def polynomial(x, *p):
     """
     Polynomial of order 9.
     :param p: [offset (a0), linear (a1), quadratic (a2), ..., a9, center]
