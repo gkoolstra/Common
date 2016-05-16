@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 import scipy, sys, cmath, common
 import scipy.fftpack
 from scipy import optimize
-from common import get_phase
+#from common import get_phase
 
 def argselectdomain(xdata,domain):
     ind=np.searchsorted(xdata,domain)
@@ -869,7 +869,7 @@ def s11_phase_func(x, *p):
     :param p: [w0, Qi, Qc]
     :return: common.get_phase(((p[2]-p[1])/p[2] + 2*1j*(x-p[0])*p[1]/p[0])/((p[1]+p[2])/p[2] + 2*1j*(x-p[0])*p[1]/p[0]))
     """
-    return get_phase(((p[2]-p[1])/p[2] + 2*1j*(x-p[0])*p[1]/p[0])/((p[1]+p[2])/p[2] + 2*1j*(x-p[0])*p[1]/p[0]))
+    return common.get_phase(((p[2]-p[1])/p[2] + 2*1j*(x-p[0])*p[1]/p[0])/((p[1]+p[2])/p[2] + 2*1j*(x-p[0])*p[1]/p[0]))
 
 def s11_mag_func_asymmetric(x, *p):
     """
@@ -887,7 +887,7 @@ def s11_phase_func_asymmetric(x, *p):
     :param p: [f0, kr, eps, df, scale]
     :return: common.get_phase((1j*(x-p[0]) + (p[2]-p[1]/2.))/(1j*(x-p[0]) + 1j*p[3] + (p[2]+p[1]/2.)))
     """
-    return get_phase((1j*(x-p[0]) + (p[2]-p[1]/2.))/(1j*(x-p[0]) + 1j*p[3] + (p[2]+p[1]/2.)))
+    return common.get_phase((1j*(x-p[0]) + (p[2]-p[1]/2.))/(1j*(x-p[0]) + 1j*p[3] + (p[2]+p[1]/2.)))
 
 def s11_mag_twoport(x, *p):
     """
@@ -915,7 +915,7 @@ def s11_phase_twoport(x, *p):
     kr = f0/Qc
     eps = f0/Qi
     ki = df
-    return get_phase((-1j*dw + 1j*ki - eps)/(1j*dw + kr + eps))
+    return common.get_phase((-1j*dw + 1j*ki - eps)/(1j*dw + kr + eps))
 
 def parabolafunc(x, *p):
     """
