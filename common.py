@@ -140,8 +140,13 @@ def configure_axes(fontsize):
     :param fontsize: Font size in points, used for the axes labels and ticks.
     :return: None
     """
-    matplotlib.rc('font', **{'size': fontsize, 'family':'sans-serif','sans-serif':['Arial']})
-    matplotlib.rc('figure', **{'dpi': 80, 'figsize': (6.,4.)})
+    import platform
+    if platform.system() == 'Linux':
+        matplotlib.rc('font', **{'size': fontsize})
+        matplotlib.rc('figure', **{'dpi': 80, 'figsize': (6.,4.)})
+    else:
+        matplotlib.rc('font', **{'size': fontsize, 'family':'sans-serif','sans-serif':['Arial']})
+        matplotlib.rc('figure', **{'dpi': 80, 'figsize': (6.,4.)})
 
 
 def legend_outside(**kwargs):
