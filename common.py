@@ -1,7 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib
-import fit, cmath
+import kfit, cmath
 from tabulate import tabulate
 
 def get_phase(array):
