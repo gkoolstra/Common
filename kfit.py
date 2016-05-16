@@ -453,8 +453,6 @@ def fit_hanger(xdata, ydata, fitparams=None, domain=None, showfit=False, showsta
     :param showstartfit: True/False
     :param printresult: True/False
     :param label: String
-    :param mark_data: Ex.: '.k'
-    :param mark_fit: Ex.: '-r'
     :return: Optimal fit parameters [f0, Qi, Qc, df, scale] if successful.
     """
     if domain is not None:
@@ -474,7 +472,7 @@ def fit_hanger(xdata, ydata, fitparams=None, domain=None, showfit=False, showsta
         fitparams = [f0, abs(Qi), abs(Qc), 0., scale]
 
     params, param_errs = fitbetter(fitdatax, fitdatay, hangerfunc, fitparams, domain=domain, showfit=showfit,
-                                   showstartfit=showstartfit, label=label, mark_data=mark_data, mark_fit=mark_fit)
+                                   showstartfit=showstartfit, label=label, **kwarg)
 
     if verbose:
         parnames = ['f0', 'Qi', 'Qc', 'df', 'scale']
