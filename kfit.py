@@ -49,8 +49,8 @@ def get_rsquare(ydata, ydatafit):
     return 1 - residual_sum_of_squares / total_sum_of_squares
 
 
-def fitbetter(xdata, ydata, fitfunc, fitparams, domain=None, showfit=False, showstartfit=False,
-              showdata=True, label="", mark_data='bo', mark_fit='r-'):
+def fitbetter(xdata, ydata, fitfunc, fitparams, parambounds=None, domain=None, showfit=False, showstartfit=False,
+              showdata=True, label="", mark_data='bo', mark_fit='r-', **kwargs):
     """
     Uses curve_fit from scipy.optimize to fit a non-linear least squares function to ydata, xdata
     :param xdata: x-axis
@@ -72,8 +72,17 @@ def fitbetter(xdata, ydata, fitfunc, fitparams, domain=None, showfit=False, show
         fitdatax = xdata
         fitdatay = ydata
 
+    if parambounds is None:
+        parambounds = (-np.inf, +np.inf)
+
+    # New in scipy 0.17:
+    # * Parameter bounds: constrain fit parameters.
+    #   Example: if there are 3 fit parameters which have to be constrained to (0, inf) we can use
+    #   parambounds = ([0, 0, 0], [np.inf, np.inf, np.inf]), Alternatively, one may set: parambounds = (0, np.inf).
+    #   Default is of course (-np.inf, np.inf)
+
     startparams = fitparams
-    bestfitparams, covmatrix = optimize.curve_fit(fitfunc, fitdatax, fitdatay, startparams)
+    bestfitparams, covmatrix = optimize.curve_fit(fitfunc, fitdatax, fitdatay, startparams, bounds=parambounds, **kwargs)
 
     try:
         fitparam_errors = np.sqrt(np.diag(covmatrix))
@@ -256,7 +265,7 @@ def fit_N_gauss(xdata, ydata, fitparams=None, domain=None, showfit=False, showst
 def fit_exp(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False, label="",
             verbose=True, **kwarg):
     """
-    Fit exponential decay of the form (p[0]+p[1]*exp(-(x-p[2])/p[3])). Uses expfunc.
+    Fit exponential decay of the form (p[0]+p[1]*exp(-x/p[2])). Uses expfunc.
     :param xdata: x-data
     :param ydata: y-data
     :param fitparams: [offset, amplitude, t0, tau]
@@ -272,18 +281,20 @@ def fit_exp(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartf
         fitdatax = xdata
         fitdatay = ydata
     if fitparams is None:
-        fitparams = [0., 0., 0., 0.]
+        fitparams = [0., 0., 0.]
         fitparams[0] = fitdatay[-1]
         fitparams[1] = fitdatay[0] - fitdatay[-1]
-        fitparams[1] = fitdatay[0] - fitdatay[-1]
-        fitparams[2] = fitdatax[0]
-        fitparams[3] = (fitdatax[-1] - fitdatax[0]) / 5.
+        fitparams[2] = (fitdatax[-1] - fitdatax[0]) / 5.
+
+    # Note that one may use the Jacobian, provided no bounds are supplied. There's still an error in the output covariance.
+    def jacobian(fitparams, xdata, ydata, expfunc):
+        return [np.ones(len(xdata)), np.exp(-xdata/fitparams[2]), fitparams[1]/fitparams[2]**2 * np.exp(-xdata/fitparams[2])]
 
     params, param_errs = fitbetter(fitdatax, fitdatay, expfunc, fitparams, domain=None, showfit=showfit,
-                                   showstartfit=showstartfit, label=label)
+                                   showstartfit=showstartfit, label=label)#, Dfun=jacobian, col_deriv=1)
 
     if verbose:
-        parnames = ['Offset', 'Amplitude', 'Start time', '1/e time']
+        parnames = ['Offset', 'Amplitude', '1/e time']
         print tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
                        tablefmt="rst", floatfmt="", numalign="center", stralign='left')
 
@@ -565,12 +576,15 @@ def fit_s11(xdata, ydata, mode='oneport', fitparams=None, domain=None, showfit=F
         fitparams = [f0_guess, Qc_guess, Qi_guess, df_guess, scale_guess]
 
     if mode == 'oneport':
-        params, param_errs = fitbetter(fitdatax, fitdatay, s11_mag_func_asymmetric, fitparams, domain=None,
-                                       showfit=showfit,
+        params, param_errs = fitbetter(fitdatax, fitdatay, s11_mag_func_asymmetric, fitparams,
+                                       parambounds=([0, 0, 0, -np.inf, -np.inf], np.inf),
+                                       domain=None, showfit=showfit,
                                        showstartfit=showstartfit, label=label, **kwarg)
         names = ['f0', 'kr', 'eps', 'df', 'scale']
     else:
-        params, param_errs = fitbetter(fitdatax, fitdatay, s11_mag_twoport, fitparams, domain=None, showfit=showfit,
+        params, param_errs = fitbetter(fitdatax, fitdatay, s11_mag_twoport, fitparams,
+                                       parambounds=([0, 0, 0, -np.inf, -np.inf], np.inf),
+                                       domain=None, showfit=showfit,
                                        showstartfit=showstartfit, label=label, **kwarg)
         names = ['f0', 'Qc', 'Qi', 'df', 'scale']
 
@@ -817,9 +831,9 @@ def expfunc(x, *p):
     Exponential function, including an offset
     :param p: [offset, amplitude, t0, tau]
     :param x: time
-    :return: p[0]+p[1]*math.e**(-(x-p[2])/p[3])
+    :return: p[0]+p[1]*math.e**(-x/p[2])
     """
-    return p[0] + p[1] * math.e ** (-(x - p[2]) / p[3])
+    return p[0] + p[1] * math.e ** (-x / p[2])
 
 
 def pulse_errfunc(x, *p):
