@@ -134,6 +134,50 @@ def save_figure(fig, save_path=None, open_explorer=True):
         print "Desired path %s does not exist."%(save_path)
 
 
+def mapped_color_plot(xdata, ydata, cmap=plt.cm.viridis, clim=None, type='x', log_scaling=False):
+    """
+    Plot points in a data set with different color. The value of the color is determined either by the x-value or the
+    y-value and can be scaled linearly or logarithmically.
+    :param xdata: x-points
+    :param ydata: y-points
+    :param cmap: plt.cm instance
+    :param clim: Tuple (cmin, cmax). Default is None.
+    :param type: Either 'x' or 'y'
+    :param log_scaling: Scale data logarithmically
+    :return:
+    """
+    if clim is None:
+        if type == 'x':
+            if log_scaling:
+                vmin, vmax = np.min(np.log10(xdata)), np.max(np.log10(xdata))
+            else:
+                vmin, vmax = np.min(xdata), np.max(xdata)
+        else:
+            if log_scaling:
+                vmin, vmax = np.min(np.log10(xdata)), np.max(np.log10(xdata))
+            else:
+                vmin, vmax = np.min(xdata), np.max(xdata)
+    else:
+        vmin, vmax = clim
+
+    import matplotlib
+    norm = matplotlib.colors.Normalize(vmin=vmin, vmax=vmax)
+    m = plt.cm.ScalarMappable(norm=norm, cmap=cmap)
+
+    for x, y in zip(xdata, ydata):
+        if type == 'x':
+            if log_scaling:
+                plt.plot(x, y, 'o', m.to_rgba(np.log10(x)))
+            else:
+                plt.plot(x, y, 'o', m.to_rgba(x))
+        else:
+            if log_scaling:
+                plt.plot(x, y, 'o', m.to_rgba(np.log10(y)))
+            else:
+                plt.plot(x, y, 'o', m.to_rgba(y))
+
+
+
 def configure_axes(fontsize):
     """
     Creates axes in the Arial font with fontsize as specified by the user
