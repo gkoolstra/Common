@@ -134,7 +134,7 @@ def save_figure(fig, save_path=None, open_explorer=True):
         print "Desired path %s does not exist."%(save_path)
 
 
-def mapped_color_plot(xdata, ydata, cmap=plt.cm.viridis, clim=None, scale_type='x', log_scaling=False):
+def mapped_color_plot(xdata, ydata, cmap=plt.cm.viridis, clim=None, scale_type='x', log_scaling=False, **kwarg):
     """
     Plot points in a data set with different color. The value of the color is determined either by the x-value or the
     y-value and can be scaled linearly or logarithmically.
@@ -154,9 +154,9 @@ def mapped_color_plot(xdata, ydata, cmap=plt.cm.viridis, clim=None, scale_type='
                 vmin, vmax = np.min(xdata), np.max(xdata)
         else:
             if log_scaling:
-                vmin, vmax = np.min(np.log10(xdata)), np.max(np.log10(xdata))
+                vmin, vmax = np.min(np.log10(ydata)), np.max(np.log10(ydata))
             else:
-                vmin, vmax = np.min(xdata), np.max(xdata)
+                vmin, vmax = np.min(ydata), np.max(ydata)
     else:
         vmin, vmax = clim
 
@@ -167,14 +167,14 @@ def mapped_color_plot(xdata, ydata, cmap=plt.cm.viridis, clim=None, scale_type='
     for x, y in zip(xdata, ydata):
         if scale_type == 'x':
             if log_scaling:
-                plt.plot(x, y, 'o', color=m.to_rgba(np.log10(x)))
+                plt.plot(x, y, 'o', color=m.to_rgba(np.log10(x)), **kwarg)
             else:
-                plt.plot(x, y, 'o', color=m.to_rgba(x))
+                plt.plot(x, y, 'o', color=m.to_rgba(x), **kwarg)
         else:
             if log_scaling:
-                plt.plot(x, y, 'o', color=m.to_rgba(np.log10(y)))
+                plt.plot(x, y, 'o', color=m.to_rgba(np.log10(y)), **kwarg)
             else:
-                plt.plot(x, y, 'o', color=m.to_rgba(y))
+                plt.plot(x, y, 'o', color=m.to_rgba(y), **kwarg)
 
 
 
