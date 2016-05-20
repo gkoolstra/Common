@@ -134,7 +134,7 @@ def save_figure(fig, save_path=None, open_explorer=True):
         print "Desired path %s does not exist."%(save_path)
 
 
-def mapped_color_plot(xdata, ydata, cmap=plt.cm.viridis, clim=None, scale_type='x', log_scaling=False, **kwarg):
+def mapped_color_plot(xdata, ydata, cmap=plt.cm.viridis, clim=None, scale_type='sequential', log_scaling=False, **kwarg):
     """
     Plot points in a data set with different color. The value of the color is determined either by the x-value or the
     y-value and can be scaled linearly or logarithmically.
@@ -152,6 +152,8 @@ def mapped_color_plot(xdata, ydata, cmap=plt.cm.viridis, clim=None, scale_type='
                 vmin, vmax = np.min(np.log10(xdata)), np.max(np.log10(xdata))
             else:
                 vmin, vmax = np.min(xdata), np.max(xdata)
+        elif scale_type == 'sequential':
+            vmin, vmax = 0, len(xdata)-1
         else:
             if log_scaling:
                 vmin, vmax = np.min(np.log10(ydata)), np.max(np.log10(ydata))
@@ -164,17 +166,21 @@ def mapped_color_plot(xdata, ydata, cmap=plt.cm.viridis, clim=None, scale_type='
     norm = matplotlib.colors.Normalize(vmin=vmin, vmax=vmax)
     m = plt.cm.ScalarMappable(norm=norm, cmap=cmap)
 
+    idx = 0
     for x, y in zip(xdata, ydata):
         if scale_type == 'x':
             if log_scaling:
                 plt.plot(x, y, 'o', color=m.to_rgba(np.log10(x)), **kwarg)
             else:
                 plt.plot(x, y, 'o', color=m.to_rgba(x), **kwarg)
+        elif scale_type == 'sequential':
+            plt.plot(x, y, 'o', color=m.to_rgba(idx), **kwarg)
         else:
             if log_scaling:
                 plt.plot(x, y, 'o', color=m.to_rgba(np.log10(y)), **kwarg)
             else:
                 plt.plot(x, y, 'o', color=m.to_rgba(y), **kwarg)
+        idx+=1
 
 
 
