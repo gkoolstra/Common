@@ -167,14 +167,14 @@ def mapped_color_plot(xdata, ydata, cmap=plt.cm.viridis, clim=None, scale_type='
     for x, y in zip(xdata, ydata):
         if scale_type == 'x':
             if log_scaling:
-                plt.plot(x, y, 'o', m.to_rgba(np.log10(x)))
+                plt.plot(x, y, 'o', color=m.to_rgba(np.log10(x)))
             else:
-                plt.plot(x, y, 'o', m.to_rgba(x))
+                plt.plot(x, y, 'o', color=m.to_rgba(x))
         else:
             if log_scaling:
-                plt.plot(x, y, 'o', m.to_rgba(np.log10(y)))
+                plt.plot(x, y, 'o', color=m.to_rgba(np.log10(y)))
             else:
-                plt.plot(x, y, 'o', m.to_rgba(y))
+                plt.plot(x, y, 'o', color=m.to_rgba(y))
 
 
 
