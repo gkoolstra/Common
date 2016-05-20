@@ -53,10 +53,13 @@ def fitbetter(xdata, ydata, fitfunc, fitparams, parambounds=None, domain=None, s
               showdata=True, label="", mark_data='bo', mark_fit='r-', **kwargs):
     """
     Uses curve_fit from scipy.optimize to fit a non-linear least squares function to ydata, xdata
+    Note: when applying bounds the fit method used is a different one than with an unconstrained fit. It's good
+    practice to not apply bounds to parameters if it's not needed.
     :param xdata: x-axis
     :param ydata: y-axis
     :param fitfunc: One of the fitfunctions below
     :param fitparams: Parameters for the fitfunction
+    :param parambounds: Tuple of bounds for each of the parameters: ([par1_min, par2_min, ...], [par1_max, par2_max, ...])
     :param domain: Domain for the xdata
     :param showfit: Show the fit
     :param showstartfit: Show the curve with initial guesses
@@ -542,8 +545,10 @@ def fit_parabola(xdata, ydata, fitparams=None, domain=None, showfit=False, shows
 def fit_s11(xdata, ydata, mode='oneport', fitparams=None, domain=None, showfit=False, showstartfit=False,
             label="", verbose=True, **kwarg):
     """
-    Fit a S11 curve. Uses s11_mag_func_asymmetric. Note: fits the voltage signal, not a power (i.e. use this function
-    to fit |S11| instead of |S11|**2. Note Qi = f0/(2*eps), Qc = f0/kr.
+    Fit an S11 curve. For mode='oneport' this code uses s11_mag_func_asymmetric. If mode='twoport' the code uses
+    s11_mag_twoport. In both cases the fit function can fit asymmetric line shapes, represented by the parameter df.
+    NB: fits the voltage signal, not a power (i.e. use this functionto fit |S11| instead of |S11|**2.
+    For mode='oneport', Note Qi = f0/(2*eps), Qc = f0/kr.
     :param xdata: Frequency points
     :param ydata: S11 voltage data
     :param fitparams: [f0, kr, eps, df, scale]
