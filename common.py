@@ -93,7 +93,7 @@ def dBm_to_vpp(Pdbm, Z0=50.):
     Pmw = 10**(Pdbm/10.)
     return 2 * np.sqrt(2) * np.sqrt(Pmw*Z0/1E3)
 
-def save_figure(fig, save_path=None, open_explorer=True):
+def save_figure(fig, save_path=None, open_explorer=False):
     """
     Saves a figure with handle "fig" in "save_path". save_path does not need to be specified, if not specified
     the function will create a new file in S:\Gerwin\iPython notebooks\Figures under the current date.
