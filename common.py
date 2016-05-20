@@ -134,7 +134,7 @@ def save_figure(fig, save_path=None, open_explorer=True):
         print "Desired path %s does not exist."%(save_path)
 
 
-def mapped_color_plot(xdata, ydata, cmap=plt.cm.viridis, clim=None, type='x', log_scaling=False):
+def mapped_color_plot(xdata, ydata, cmap=plt.cm.viridis, clim=None, scale_type='x', log_scaling=False):
     """
     Plot points in a data set with different color. The value of the color is determined either by the x-value or the
     y-value and can be scaled linearly or logarithmically.
@@ -147,7 +147,7 @@ def mapped_color_plot(xdata, ydata, cmap=plt.cm.viridis, clim=None, type='x', lo
     :return:
     """
     if clim is None:
-        if type == 'x':
+        if scale_type == 'x':
             if log_scaling:
                 vmin, vmax = np.min(np.log10(xdata)), np.max(np.log10(xdata))
             else:
@@ -165,7 +165,7 @@ def mapped_color_plot(xdata, ydata, cmap=plt.cm.viridis, clim=None, type='x', lo
     m = plt.cm.ScalarMappable(norm=norm, cmap=cmap)
 
     for x, y in zip(xdata, ydata):
-        if type == 'x':
+        if scale_type == 'x':
             if log_scaling:
                 plt.plot(x, y, 'o', m.to_rgba(np.log10(x)))
             else:
