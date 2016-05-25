@@ -142,7 +142,7 @@ def mapped_color_plot(xdata, ydata, cmap=plt.cm.viridis, clim=None, scale_type='
     :param ydata: y-points
     :param cmap: plt.cm instance
     :param clim: Tuple (cmin, cmax). Default is None.
-    :param type: Either 'x' or 'y'
+    :param scale_type: Either 'x', 'y', 'sequential' or 'external'
     :param log_scaling: Scale data logarithmically
     :return:
     """
@@ -154,7 +154,7 @@ def mapped_color_plot(xdata, ydata, cmap=plt.cm.viridis, clim=None, scale_type='
                 vmin, vmax = np.min(xdata), np.max(xdata)
         elif scale_type == 'sequential':
             vmin, vmax = 0, len(xdata)-1
-        else:
+        elif scale_type == 'y':
             if log_scaling:
                 vmin, vmax = np.min(np.log10(ydata)), np.max(np.log10(ydata))
             else:
