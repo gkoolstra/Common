@@ -134,7 +134,8 @@ def save_figure(fig, save_path=None, open_explorer=False):
         print "Desired path %s does not exist."%(save_path)
 
 
-def mapped_color_plot(xdata, ydata, cmap=plt.cm.viridis, clim=None, scale_type='sequential', log_scaling=False, **kwarg):
+def mapped_color_plot(xdata, ydata, cmap=plt.cm.viridis, clim=None, scale_type='sequential', log_scaling=False,
+                      colorbar=False, **kwarg):
     """
     Plot points in a data set with different color. The value of the color is determined either by the x-value or the
     y-value and can be scaled linearly or logarithmically.
@@ -181,6 +182,10 @@ def mapped_color_plot(xdata, ydata, cmap=plt.cm.viridis, clim=None, scale_type='
             else:
                 plt.plot(x, y, 'o', color=m.to_rgba(y), **kwarg)
         idx+=1
+
+    if colorbar:
+        m._A = []
+        plt.colorbar(m)
 
 
 
