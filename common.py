@@ -167,6 +167,7 @@ def mapped_color_plot(xdata, ydata, cmap=plt.cm.viridis, clim=None, scale_type='
     norm = matplotlib.colors.Normalize(vmin=vmin, vmax=vmax)
     m = plt.cm.ScalarMappable(norm=norm, cmap=cmap)
 
+    #plt.scatter(xdata, ydata, c=)
     idx = 0
     for x, y in zip(xdata, ydata):
         if scale_type == 'x':
