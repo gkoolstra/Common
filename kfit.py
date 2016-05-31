@@ -675,7 +675,7 @@ def fit_lor_asym(xdata, ydata, fitparams=None, domain=None, showfit=False, shows
     return params, param_errs
 
 
-def fit_poly(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False,
+def fit_poly(xdata, ydata, mode=None, fitparams=None, domain=None, showfit=False, showstartfit=False,
              label="", verbose=True, **kwarg):
     """
     Fit a polynomial. Uses polyfunc. Specify fitparams as [p0, p1, p2, ...] where
@@ -700,11 +700,21 @@ def fit_poly(xdata, ydata, fitparams=None, domain=None, showfit=False, showstart
         fitdatax = xdata
         fitdatay = ydata
 
-    params, param_errs = fitbetter(fitdatax, fitdatay, polyfunc, fitparams, domain=None, showfit=showfit,
+    if mode == 'even':
+        fitfunction = polyfunc_even
+        fitfunc_string = "Fit function: y = a0 + a1*x**2 + a2*x**4 + ..."
+    elif mode == 'odd':
+        fitfunction = polyfunc_odd
+        fitfunc_string = "Fit function: y = a0 + a1*x + ..."
+    else:
+        fitfunction = polyfunc
+        fitfunc_string = "Fit function: y = a0 + a1*x + a2*x**3 + ..."
+
+    params, param_errs = fitbetter(fitdatax, fitdatay, fitfunction, fitparams, domain=None, showfit=showfit,
                                    showstartfit=showstartfit, label=label, **kwarg)
 
     if verbose:
-        print "Fit function: y = a0 + a1*x + ..."
+        print fitfunc_string
         parnames = ["a%d" % idx for idx in range(len(params))]
         print tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
                        tablefmt="rst", floatfmt="", numalign="center", stralign='left')
@@ -993,6 +1003,32 @@ def polyfunc(x, *p):
     y = 0
     for n, P in enumerate(p):
         y += P * x ** n
+    return y
+
+
+def polyfunc_even(x, *p):
+    """
+    Even polynomial of arbitrary order. Order is specified by the length of p
+    :param x: x-data
+    :param p: [a0, a1, a2, a3, ...] where y = a0 + a1*x**2 + a2*x**4 + ...
+    :return: p[0] + p[1]*x**2 + p[2]*x**4 + ...
+    """
+    y = 0
+    for n, P in enumerate(p):
+        y += P * x ** (2*n)
+    return y
+
+
+def polyfunc_odd(x, *p):
+    """
+    Odd polynomial of arbitrary order. Order is specified by the length of p
+    :param x: x-data
+    :param p: [a0, a1, a2, a3, ...] where y = a0 + a1*x + a2*x**3 + ...
+    :return: p[0] + p[1]*x + p[2]*x**3 + ...
+    """
+    y = p[0]
+    for n, P in enumerate(p[1:]):
+        y += P * x ** (2*n+1)
     return y
 
 
