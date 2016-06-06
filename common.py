@@ -1,8 +1,56 @@
 import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib
-import kfit, cmath
+import kfit, cmath, csv, os
 from tabulate import tabulate
+
+def load_csv(filename, header_length=7, footer_length=2, ncols=3):
+    """
+    Load a csv file into a numpy array.
+    :param datafile: filename of the .csv file
+    :param header_length: number of header rows that are no data
+    :param footer_length: number footer rows that are no data
+    :param ncols: Number of columns in the data
+    :return:
+    """
+    with open(filename, 'rb') as f:
+        reader = csv.reader(f)
+        len_data = sum(1 for row in reader) - header_length - footer_length
+
+    with open(filename, 'rb') as f:
+        reader = csv.reader(f)
+        for k in range(header_length):
+            next(reader, None)
+
+
+        for idx,row in enumerate(reader):
+            if idx == 0:
+                data = np.zeros([len_data, ncols])
+
+            try:
+                for k in range(ncols):
+                    data[idx,k] = float(row[k])
+            except:
+                pass
+
+    return data
+
+def csv_to_h5(filename, **kwargs):
+    """
+    Convert a .csv file from the PNAX to a h5 file with the same name
+    :param filename: Filename of the file that needs to be converted
+    :return:
+    """
+    data = load_csv(filename, **kwargs)
+    h5_filename = filename[:-4]+'.h5'
+    if not os.path.isfile(h5_filename):
+        print "%s ..."%h5_filename
+        myfile = data_cache.dataCacheProxy(filepath=h5_filename, expInst=None)
+        myfile.append("fpts", data[:,0])
+        myfile.append("mags", data[:,1])
+        myfile.append("phases", data[:,2])
+    else:
+        print "%s <-- already exists, skipping..."%h5_filename
 
 def get_phase(array):
     """
