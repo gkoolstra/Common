@@ -587,7 +587,7 @@ def get_noof_photons_in_cavity(P, f0, Q):
     """
     hbar = 1.055E-34
     w0 = 2*np.pi*f0
-    P_W = 10**(P/10.)
+    P_W = 10**((P-30)/10.)
     kappa = w0/Q
     return P_W/(hbar*w0*kappa/(2*np.pi))
 
@@ -600,7 +600,7 @@ def get_noof_photons_in_input(P, f):
     """
     hbar = 1.055E-34
     w0 = 2*np.pi*f
-    P_W = 10**(P/10.)
+    P_W = 10**((P-30)/10.)
     return P_W/(hbar*w0**2/(2*np.pi))
 
 def pad_zeros(f, Y, until='auto', verbose=False):
