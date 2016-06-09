@@ -3,6 +3,7 @@ from matplotlib import pyplot as plt
 import matplotlib
 import kfit, cmath, csv, os
 from tabulate import tabulate
+from scipy.signal import convolve2d
 
 def load_csv(filename, header_length=7, footer_length=2, ncols=3):
     """
@@ -105,13 +106,23 @@ def find_nearest(array, value):
     idx=(np.abs(array-value)).argmin()
     return idx
 
-def moving_average(interval, window_size):
+def moving_average(ydata, window_size):
     """
     Outputs the moving average of a function interval over a window_size. Output is 
     the same size as the input. 
     """
     window = np.ones(int(window_size))/float(window_size)
-    return np.convolve(interval, window, 'same')
+    return np.convolve(ydata, window, 'same')
+
+def moving_average_2d(ydata, window_size):
+    """
+    Convolve the 2D array ydata with a uniform window. This acts as a 2D low pass filter.
+    :param ydata: N x M array to apply the window to
+    :param window_size: Tuple: (Nrows, Ncols) where Ncols is the number of columns and NRows is the number of rows
+    :return: N x M array (ydata convoluted with the window)
+    """
+    window = np.ones((int(window_size[1]),int(window_size[0])))/float(window_size[0]*window_size[1])
+    return convolve2d(ydata, window, mode='same')
 
 def dBm_to_W(Pdbm):
     """
