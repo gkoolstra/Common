@@ -183,7 +183,7 @@ def save_figure(fig, save_path=None, open_explorer=False):
             i += 1
 
     if os.path.exists(os.path.split(save_path)[0]):
-        fig.savefig(save_path, dpi=300)
+        fig.savefig(save_path, dpi=300, bbox_inches="tight")
 
         time.sleep(1)
         if open_explorer:
@@ -247,8 +247,6 @@ def mapped_color_plot(xdata, ydata, cmap=plt.cm.viridis, clim=None, scale_type='
         m._A = []
         plt.colorbar(m)
 
-
-
 def configure_axes(fontsize):
     """
     Creates axes in the Arial font with fontsize as specified by the user
@@ -262,7 +260,6 @@ def configure_axes(fontsize):
     else:
         matplotlib.rc('font', **{'size': fontsize, 'family':'sans-serif','sans-serif':['Arial']})
         matplotlib.rc('figure', **{'dpi': 80, 'figsize': (6.,4.)})
-
 
 def legend_outside(**kwargs):
     """
@@ -428,69 +425,6 @@ def split_power(power_in, conversion_loss):
     inW = 0.5*10**(power_in_dB/10.)
     power_out_dB = 10*np.log10(inW)
     return power_out_dB
-
-def fit_lorentzian(g_A, g_gamma, g_x0, *arg):
-    """
-    Fit lorentzian lineshape. Parameters:
-    A: scaled amplitude
-    gamma: half width
-    x0: resonance frequency
-    """
-    fitfunc_str = '1/pi A * gamma / ((x-x0)^2 + gamma^2)'
-
-    A = fit.Parameter(g_A, 'A')
-    gamma = fit.Parameter(g_gamma, 'gamma')
-    x0 = fit.Parameter(g_x0, 'x0')
-
-    p0 = [A, gamma, x0]
-
-    def fitfunc(x):
-        return A()/((x-x0())**2+gamma()**2)
-
-    return p0, fitfunc, fitfunc_str
-
-def fit_hanger(g_f0, g_Qi, g_Qc, g_df, g_scale):
-    """
-    Fit hanger function with asymmetric lineshape. 
-    Asymmetry is due to different load impedance (> or < 50 Ohms)
-    and is represented by parameter df (note: in Hz)
-    """
-    fitfunc_str = 'Asymmetric hanger function'
-
-    f0 = fit.Parameter(g_f0, 'f0')
-    Qi = fit.Parameter(g_Qi, 'Qi')
-    Qc = fit.Parameter(g_Qc, 'Qc')
-    df = fit.Parameter(g_df, 'df')
-    scale = fit.Parameter(g_scale, 'scale')
-
-    p0 = [f0, Qi, Qc, df, scale]
-
-    def fitfunc(x):
-        a=(x-(f0()+df()))/(f0()+df())
-        b=2*df()/f0()
-        Q0=1./(1./Qi()+1./Qc())
-        return scale()*(-2.*Q0*Qc() + Qc()**2. + Q0**2.*(1. + Qc()**2.*(2.*a + b)**2.))/(Qc()**2*(1. + 4.*Q0**2.*a**2.))
-
-    return p0, fitfunc, fitfunc_str
-
-def fit_kinetic_fraction(g_alpha, g_f0, g_Tc):
-    """
-    Fit kinetic induction from temperature sweep of the resonance frequency
-    """
-    #fitfunc_str = 'f0 * 1/sqrt(1 + alpha * 1/(1-T/Tc))'
-    fitfunc_str = 'f0*(1-alpha/2*(1-(T/Tc)**4)**-1)'
-
-    f0 = fit.Parameter(g_f0, 'f0')
-    alpha = fit.Parameter(g_alpha, 'alpha')
-    Tc = fit.Parameter(g_Tc, 'Tc')
-    
-    p0 = [f0, alpha, Tc]
-
-    def fitfunc(x):
-        #return f0()*1/np.sqrt(1+alpha()/(1-x**4))
-        return f0()*(1-alpha()/2.*1/(1-(x/Tc())**4))
-
-    return p0, fitfunc, fitfunc_str    
 
 def Qext(L, C, Cin, Cout):
     """
