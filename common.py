@@ -5,13 +5,6 @@ import kfit, cmath, csv, os
 from tabulate import tabulate
 from scipy.signal import convolve2d
 
-try:
-    sys.path.append(r"/mnt/s/_Data/160603 - EonHe M016v5/modules")
-    import util, data_cache
-except:
-    print "data_cache.py was not loaded. Limited functionality for csv_to_h5"
-
-
 def load_csv(filename, header_length=7, footer_length=2, ncols=3):
     """
     Load a csv file into a numpy array.
@@ -43,7 +36,7 @@ def load_csv(filename, header_length=7, footer_length=2, ncols=3):
 
     return data
 
-def csv_to_h5(filename, **kwargs):
+def csv_to_h5(filename, data_cache, **kwargs):
     """
     Convert a .csv file from the PNAX to a h5 file with the same name
     :param filename: Filename of the file that needs to be converted
