@@ -5,6 +5,13 @@ import kfit, cmath, csv, os
 from tabulate import tabulate
 from scipy.signal import convolve2d
 
+try:
+    sys.path.append(r"/mnt/s/_Data/160603 - EonHe M016v5/experiment")
+    import util, data_cache
+except:
+    print "data_cache.py was not loaded. Limited functionality for csv_to_h5"
+
+
 def load_csv(filename, header_length=7, footer_length=2, ncols=3):
     """
     Load a csv file into a numpy array.
