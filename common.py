@@ -6,7 +6,7 @@ from tabulate import tabulate
 from scipy.signal import convolve2d
 
 try:
-    sys.path.append(r"/mnt/s/_Data/160603 - EonHe M016v5/experiment")
+    sys.path.append(r"/mnt/s/_Data/160603 - EonHe M016v5/modules")
     import util, data_cache
 except:
     print "data_cache.py was not loaded. Limited functionality for csv_to_h5"
