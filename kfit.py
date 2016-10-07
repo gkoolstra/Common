@@ -13,10 +13,11 @@ fitting procedure.
 import numpy as np
 import math as math
 import matplotlib.pyplot as plt
-import scipy, sys, cmath, common
+import scipy, sys, cmath
 import scipy.fftpack
 from scipy import optimize
 from tabulate import tabulate
+from . import common
 
 
 def argselectdomain(xdata, domain):
@@ -90,8 +91,9 @@ def fitbetter(xdata, ydata, fitfunc, fitparams, parambounds=None, domain=None, s
     try:
         fitparam_errors = np.sqrt(np.diag(covmatrix))
     except:
-        print covmatrix
-        print "Error encountered in calculating errors on fit parameters. This may result from a very flat parameter space"
+        print(covmatrix)
+        print(
+            "Error encountered in calculating errors on fit parameters. This may result from a very flat parameter space")
 
     if showfit:
         if showdata:
@@ -142,8 +144,8 @@ def fit_lor(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartf
 
     if verbose:
         parnames = ['Offset', 'Amplitude', 'f0', 'HWHM']
-        print tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
-                       tablefmt="rst", floatfmt="", numalign="center", stralign='left')
+        print(tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
+                       tablefmt="rst", floatfmt="", numalign="center", stralign='left'))
 
     # Make sure the hwhm is positive
     params[3] = abs(params[3])
@@ -173,7 +175,7 @@ def fit_kinetic_fraction(xdata, ydata, fitparams=None, Tc_fixed=False, domain=No
         fitdatay = ydata
 
     if fitparams is None:
-        print "Please provide some initial guesses."
+        print("Please provide some initial guesses.")
 
     if Tc_fixed:
         fitparams = fitparams[:2]
@@ -183,8 +185,8 @@ def fit_kinetic_fraction(xdata, ydata, fitparams=None, Tc_fixed=False, domain=No
 
     if verbose:
         parnames = ['f0', 'Kinetic Inductance fraction', 'Tc']
-        print tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
-                       tablefmt="rst", floatfmt="", numalign="center", stralign='left')
+        print(tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
+                       tablefmt="rst", floatfmt="", numalign="center", stralign='left'))
 
     return params, param_errs
 
@@ -210,15 +212,15 @@ def fit_double_lor(xdata, ydata, fitparams=None, domain=None, showfit=False, sho
         fitdatay = ydata
 
     if fitparams is None:
-        print "Please provide some initial guesses."
+        print("Please provide some initial guesses.")
 
     params, param_errs = fitbetter(fitdatax, fitdatay, twolorfunc, fitparams, domain=None, showfit=showfit,
                                    showstartfit=showstartfit, label=label)
 
     if verbose:
         parnames = ['Offset', 'A1', 'f1', 'HWHM1', 'A2', 'f2', 'HWHM2']
-        print tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
-                       tablefmt="rst", floatfmt="", numalign="center", stralign='left')
+        print(tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
+                       tablefmt="rst", floatfmt="", numalign="center", stralign='left'))
 
     return params, param_errs
 
@@ -246,7 +248,7 @@ def fit_N_gauss(xdata, ydata, fitparams=None, domain=None, showfit=False, showst
         fitdatay = ydata
 
     if fitparams is None:
-        print "Please provide some initial guesses."
+        print("Please provide some initial guesses.")
 
     if no_offset:
         params, param_errs = fitbetter(fitdatax, fitdatay, Ngaussfunc_no_offset, fitparams, domain=None,
@@ -259,7 +261,7 @@ def fit_N_gauss(xdata, ydata, fitparams=None, domain=None, showfit=False, showst
     if verbose:
         idx = 0
         for par, err in zip(params, param_errs):
-            print "Parameter {} : {} +/- {}".format(idx, par, err)
+            print("Parameter {} : {} +/- {}".format(idx, par, err))
             idx += 1
 
     return params, param_errs
@@ -298,8 +300,8 @@ def fit_exp(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartf
 
     if verbose:
         parnames = ['Offset', 'Amplitude', '1/e time']
-        print tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
-                       tablefmt="rst", floatfmt="", numalign="center", stralign='left')
+        print(tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
+                       tablefmt="rst", floatfmt="", numalign="center", stralign='left'))
 
     return params, param_errs
 
@@ -369,8 +371,8 @@ def fit_decaysin(xdata, ydata, fitparams=None, domain=None, showfit=False, shows
 
     if verbose:
         parnames = ['Amplitude', 'Frequency', 'Phi', '1/e time', 'Offset', 'Start time']
-        print tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
-                       tablefmt="rst", floatfmt="", numalign="center", stralign='left')
+        print(tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
+                       tablefmt="rst", floatfmt="", numalign="center", stralign='left'))
 
     return params, param_errs
 
@@ -410,8 +412,8 @@ def fit_sin(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartf
 
     if verbose:
         parnames = ['Amplitude', 'Frequency (Hz)', 'Phi (deg)', 'Offset']
-        print tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
-                       tablefmt="rst", floatfmt="", numalign="center", stralign='left')
+        print(tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
+                       tablefmt="rst", floatfmt="", numalign="center", stralign='left'))
 
     return params, param_errs
 
@@ -460,8 +462,8 @@ def fit_gauss(xdata, ydata, fitparams=None, no_offset=False, domain=None, showfi
         else:
             parnames = ['Offset', 'Amplitude', 'Center', 'Sigma']
 
-        print tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
-                       tablefmt="rst", floatfmt="", numalign="center", stralign='left')
+        print(tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
+                       tablefmt="rst", floatfmt="", numalign="center", stralign='left'))
 
     return params, param_errs
 
@@ -501,8 +503,8 @@ def fit_hanger(xdata, ydata, fitparams=None, domain=None, showfit=False, showsta
 
     if verbose:
         parnames = ['f0', 'Qi', 'Qc', 'df', 'scale']
-        print tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
-                       tablefmt="rst", floatfmt="", numalign="center", stralign='left')
+        print(tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
+                       tablefmt="rst", floatfmt="", numalign="center", stralign='left'))
 
     return params, param_errs
 
@@ -522,7 +524,7 @@ def fit_parabola(xdata, ydata, fitparams=None, domain=None, showfit=False, shows
     :return: Fitresult, Fiterror
     """
     if fitparams is None:
-        print "Please specify fit parameters in function input"
+        print("Please specify fit parameters in function input")
         return
 
     if domain is not None:
@@ -536,8 +538,8 @@ def fit_parabola(xdata, ydata, fitparams=None, domain=None, showfit=False, shows
 
     if verbose:
         parnames = ["a%d" % idx for idx in range(len(params))]
-        print tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
-                       tablefmt="rst", floatfmt="", numalign="center", stralign='left')
+        print(tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
+                       tablefmt="rst", floatfmt="", numalign="center", stralign='left'))
 
     return params, param_errs
 
@@ -594,8 +596,8 @@ def fit_s11(xdata, ydata, mode='oneport', fitparams=None, domain=None, showfit=F
         names = ['f0', 'Qc', 'Qi', 'df', 'scale']
 
     if verbose:
-        print tabulate(zip(names, params, param_errs), headers=["Parameter", "Value", "Std"],
-                       tablefmt="rst", floatfmt="", numalign="center", stralign='left')
+        print(tabulate(zip(names, params, param_errs), headers=["Parameter", "Value", "Std"],
+                       tablefmt="rst", floatfmt="", numalign="center", stralign='left'))
 
     return params, param_errs
 
@@ -631,8 +633,8 @@ def fit_fano(xdata, ydata, fitparams=None, domain=None, showfit=False, showstart
 
     if verbose:
         parnames = ['f0', 'FWHM', 'Fano factor', 'Amplitude']
-        print tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
-                       tablefmt="rst", floatfmt="", numalign="center", stralign='left')
+        print(tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
+                       tablefmt="rst", floatfmt="", numalign="center", stralign='left'))
 
     return params, param_errs
 
@@ -669,8 +671,8 @@ def fit_lor_asym(xdata, ydata, fitparams=None, domain=None, showfit=False, shows
 
     if verbose:
         parnames = ['f0', 'FWHM', 'Gamma', 'Amplitude']
-        print tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
-                       tablefmt="rst", floatfmt="", numalign="center", stralign='left')
+        print(tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
+                       tablefmt="rst", floatfmt="", numalign="center", stralign='left'))
 
     return params, param_errs
 
@@ -691,7 +693,7 @@ def fit_poly(xdata, ydata, mode=None, fitparams=None, domain=None, showfit=False
     :return: Fitresult, Fiterror
     """
     if fitparams is None:
-        print "Please specify fit parameters in function input"
+        print("Please specify fit parameters in function input")
         return
 
     if domain is not None:
@@ -714,10 +716,10 @@ def fit_poly(xdata, ydata, mode=None, fitparams=None, domain=None, showfit=False
                                    showstartfit=showstartfit, label=label, **kwarg)
 
     if verbose:
-        print fitfunc_string
+        print(fitfunc_string)
         parnames = ["a%d" % idx for idx in range(len(params))]
-        print tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
-                       tablefmt="rst", floatfmt="", numalign="center", stralign='left')
+        print(tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
+                       tablefmt="rst", floatfmt="", numalign="center", stralign='left'))
 
     return params, param_errs
 
@@ -752,7 +754,7 @@ def kinfunc(x, *p):
         Tc = p[2]
     else:
         Tc = 1.2
-        print "Assuming Tc = %.2f K" % Tc
+        print("Assuming Tc = %.2f K" % Tc)
 
     return f0 * (1 - alpha / 2. * 1 / (1 - (x / Tc) ** 4))
 
@@ -793,7 +795,7 @@ def print_cavity_Q(fit):
     :param fit: Optimal fitparameters found by fitlor
     :return: fit[2]/(2*fit[3])
     """
-    print fit[2] / 2 / fit[3]
+    print(fit[2] / 2 / fit[3])
     return fit[2] / 2 / fit[3]
 
 

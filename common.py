@@ -1,7 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib
-import kfit, cmath, csv, os
+import cmath, csv, os
 from tabulate import tabulate
 from scipy.signal import convolve2d
 
@@ -45,13 +45,13 @@ def csv_to_h5(filename, data_cache, **kwargs):
     data = load_csv(filename, **kwargs)
     h5_filename = filename[:-4]+'.h5'
     if not os.path.isfile(h5_filename):
-        print "%s ..."%h5_filename
+        print("%s ..."%h5_filename)
         myfile = data_cache.dataCacheProxy(filepath=h5_filename, expInst=None)
         myfile.append("fpts", data[:,0])
         myfile.append("mags", data[:,1])
         myfile.append("phases", data[:,2])
     else:
-        print "%s <-- already exists, skipping..."%h5_filename
+        print("%s <-- already exists, skipping..."%h5_filename)
 
 def get_phase(array):
     """
@@ -190,7 +190,7 @@ def save_figure(fig, save_path=None, open_explorer=False):
             subprocess.Popen(r'explorer /select,"%s"'%save_path)
 
     else:
-        print "Desired path %s does not exist."%(save_path)
+        print("Desired path %s does not exist."%(save_path))
 
 
 def mapped_color_plot(xdata, ydata, cmap=plt.cm.viridis, clim=None, scale_type='sequential', log_scaling=False,
@@ -393,7 +393,7 @@ def plot_spectrum(y, t, ret=True, do_plot=True, freqlim='auto', ylim='auto', log
                     if do_phase:
                         ax2.set_xlim(freqlim)
                 except:
-                    print "Not a valid xlim, please specify as [min, max]"
+                    print("Not a valid xlim, please specify as [min, max]")
 
             if ylim != 'auto':
                 try:
@@ -401,12 +401,12 @@ def plot_spectrum(y, t, ret=True, do_plot=True, freqlim='auto', ylim='auto', log
                     if do_phase:
                         ax2.set_ylim(ylim)
                 except:
-                    print "Not a valid ylim, please specify as [min, max]"
+                    print("Not a valid ylim, please specify as [min, max]")
 
 
         if verbose:
-            print "Maximum contribution to signal is %.2e for a frequency of %.2e Hz"\
-                    %(np.max(np.abs(Y)), frq[np.where(np.max(np.abs(Y)))[0]])
+            print("Maximum contribution to signal is %.2e for a frequency of %.2e Hz"\
+                    %(np.max(np.abs(Y)), frq[np.where(np.max(np.abs(Y)))[0]]))
     
         if ret:
             if type!='psd':
@@ -434,8 +434,8 @@ def Qext(L, C, Cin, Cout):
     w0 = 1/np.sqrt(L*C)
     Z = np.sqrt(L/C)
     Z0 = 50
-    print "Resonance frequency = f0 = %.3e Hz"%(w0/(2*np.pi))
-    print "Impedance = Z = %.3e Ohms"%Z
+    print("Resonance frequency = f0 = %.3e Hz"%(w0/(2*np.pi)))
+    print("Impedance = Z = %.3e Ohms"%Z)
     return 1/(Z0*w0**3*L*(Cin**2+Cout**2))
 
 def CfromQ(L, C, Qext):
@@ -447,8 +447,8 @@ def CfromQ(L, C, Qext):
     w0 = 1/np.sqrt(L*C)
     Z = np.sqrt(L/C)
     Z0 = 50
-    print "Resonance frequency = f0 = %.3e Hz"%(w0/(2*np.pi))
-    print "Impedance = Z = %.3e Ohms"%Z
+    print("Resonance frequency = f0 = %.3e Hz"%(w0/(2*np.pi)))
+    print("Impedance = Z = %.3e Ohms"%Z)
     return 1/np.sqrt(2*Qext*Z0*w0**3*L)
 
 def beep():
@@ -487,18 +487,18 @@ def q_finder(magnitudes, fpoints, debug=False, start_idx=None):
         pass 
 
     max_mag = magnitudes[start_idx]
-    if debug: print "Maximum magnitude is %.2f"%max_mag
+    if debug: print("Maximum magnitude is %.2f"%max_mag)
     f0 = fpoints[start_idx]
     walking_magnitude = max_mag
     k=1
 
     while abs(walking_magnitude-max_mag) < 3:
         walking_magnitude = magnitudes[start_idx+k]
-        if debug: print walking_magnitude
+        if debug: print(walking_magnitude)
         k+=1
 
     threedbpointright = fpoints[start_idx+k]
-    if debug: print threedbpointright
+    if debug: print(threedbpointright)
     k=1
 
     while abs(walking_magnitude-max_mag) < 3:
@@ -506,7 +506,7 @@ def q_finder(magnitudes, fpoints, debug=False, start_idx=None):
         k+=1
     
     threedbpointleft = fpoints[start_idx-k]
-    if debug: print threedbpointleft
+    if debug: print(threedbpointleft)
 
     df = threedbpointright-threedbpointleft
     return f0/df
@@ -559,7 +559,7 @@ def pad_zeros(f, Y, until='auto', verbose=False):
     :return:
     """
     if len(f) != len(Y):
-        print "Expected arrays of same length, got different size arrays."
+        print("Expected arrays of same length, got different size arrays.")
     else:
         if until == 'auto':
             # Pad zeros until the nearest power of 2:
@@ -586,9 +586,9 @@ def pad_zeros(f, Y, until='auto', verbose=False):
 
         if verbose:
             try:
-                print "New shape of array is (%d x %d)" % (Ynew.shape[0], Ynew.shape[1])
+                print("New shape of array is (%d x %d)" % (Ynew.shape[0], Ynew.shape[1]))
             except:
-                print "New length of array is %d" % (Ynew.shape[0])
+                print("New length of array is %d" % (Ynew.shape[0]))
 
         return fnew, Ynew
 
@@ -597,7 +597,7 @@ def get_psd(t, y, verbose=False, window=True):
     Computes the periodogram Only for real signals.
     :param t: Time in seconds
     :param y: Amplitude in V
-    :param verbose: True/False. This will print the value of the largest contribution to the PSD
+    :param verbose: True/False. This will print(the value of the largest contribution to the PSD
     :param window: This will multiply the FFT with a Hanning window to reduce influence from the finite measurement time.
                    The defult is True. The Hanning window's efficiency is largest for finite size time traces.
                    More on Hanning windows here: https://en.wikipedia.org/wiki/Window_function#Hann_.28Hanning.29_window
@@ -620,8 +620,8 @@ def get_psd(t, y, verbose=False, window=True):
         Y = Y[range(n/2)] # maps the negative frequencies on the positive ones. Only works for real input signals!
 
         if verbose:
-            print "Maximum contribution to signal is %.2e for a frequency of %.2e Hz"\
-                    %(np.max(np.abs(Y)), frq[np.where(np.max(np.abs(Y)))[0]])
+            print("Maximum contribution to signal is %.2e for a frequency of %.2e Hz"\
+                    %(np.max(np.abs(Y)), frq[np.where(np.max(np.abs(Y)))[0]]))
 
         return frq, np.abs(Y)**2
 
@@ -659,4 +659,4 @@ def get_circular_points(radius, npts, theta_offset=0, do_plot=True):
     ycircle = radius*np.sin(t * np.pi/180.)
     plt.plot(xcircle, ycircle, '--r')
 
-    print tabulate(zip(x, y), headers=["x", "y"], tablefmt="rst", floatfmt=".4f", numalign="center", stralign='center')
+    print(tabulate(zip(x, y), headers=["x", "y"], tablefmt="rst", floatfmt=".4f", numalign="center", stralign='center'))
