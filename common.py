@@ -14,11 +14,11 @@ def load_csv(filename, header_length=7, footer_length=2, ncols=3):
     :param ncols: Number of columns in the data
     :return:
     """
-    with open(filename, 'rb') as f:
+    with open(filename, 'r') as f:
         reader = csv.reader(f)
         len_data = sum(1 for row in reader) - header_length - footer_length
 
-    with open(filename, 'rb') as f:
+    with open(filename, 'r') as f:
         reader = csv.reader(f)
         for k in range(header_length):
             next(reader, None)
@@ -345,10 +345,10 @@ def plot_spectrum(y, t, ret=True, do_plot=True, freqlim='auto', ylim='auto', log
         n = len(y) # length of the signal
         T = n*dt
         frq = np.arange(n)/float(T) # two sides frequency range
-        frq = frq[range(n/2)] # one side frequency range
+        frq = frq[range(int(n/2))] # one side frequency range
 
         Y = np.fft.fft(y)/float(n) # fft computing and normalization
-        Y = Y[range(n/2)] # maps the negative frequencies on the positive ones. Only works for real input signals!
+        Y = Y[range(int(n/2))] # maps the negative frequencies on the positive ones. Only works for real input signals!
 
         if do_plot:
             plt.figure(figsize = (6.,4.))

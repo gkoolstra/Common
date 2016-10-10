@@ -1,6 +1,7 @@
 import numpy as np
-import os, sys, time, common, kfit
+import os, sys, time
 from matplotlib import pyplot as plt
+from . import common, kfit
 
 def get_geophone_constants():
     """
@@ -98,10 +99,10 @@ def fit_calibration_curve(xdata, ydata, init_guess, **kwarg):
     bestfitparams, fitparam_errors = kfit.fitbetter(xdata, ydata, geophone_func, init_guess, show_diagnostics=True,
                                                      **kwarg)
 
-    print "Fit results with 1 sigma:"
+    print("Fit results with 1 sigma:")
     params = ['Q', 'f0', 'Z12', 'RT', 'LT']
     for k in range(5):
-        print "{} = {} +/- {}".format(params[k], bestfitparams[k], fitparam_errors[k])
+        print("{} = {} +/- {}".format(params[k], bestfitparams[k], fitparam_errors[k]))
 
     return bestfitparams, fitparam_errors
 
@@ -125,7 +126,7 @@ def get_geophone_spectrum(df, G, freqlim=[1.0, 200.0], Q=1.54, f0=4.55, Z12=31.5
     ch1 = data.get('ch1')
 
     if np.sum(ch1) == 0:
-        print "WARNING: sum of ch1 is 0 for %s" % df
+        print("WARNING: sum of ch1 is 0 for %s" % df)
 
     psd = np.zeros((np.shape(ch1)[0], np.shape(ch1)[1] / 2))
     rms = list()
@@ -172,13 +173,13 @@ def get_geophone_spectrum(df, G, freqlim=[1.0, 200.0], Q=1.54, f0=4.55, Z12=31.5
         plt.xlim(freqlim)
 
     if not do_meters_per_sqrt_Hz:
-        print "RMS value of %s between %.2f Hz and %.2f Hz is %.3e +/- %.1e m" % (
-            name, freqlim[0], freqlim[1], get_frequency_rms(calibrated_displacement), np.std(rms))
+        print("RMS value of %s between %.2f Hz and %.2f Hz is %.3e +/- %.1e m" % (
+            name, freqlim[0], freqlim[1], get_frequency_rms(calibrated_displacement), np.std(rms)))
         plt.ylabel(r'Calibrated displacement (m)')
     else:
-        print "RMS value of %s between %.2f Hz and %.2f Hz is %.3e +/- %.1e m" % (
+        print("RMS value of %s between %.2f Hz and %.2f Hz is %.3e +/- %.1e m" % (
             name, freqlim[0], freqlim[1], get_frequency_rms(calibrated_displacement) / np.sqrt(np.max(t[0, :])),
-            np.std(rms) / np.sqrt(np.max(t[0, :])))
+            np.std(rms) / np.sqrt(np.max(t[0, :]))))
         plt.ylabel(r'Calibrated displacement ($\mathrm{m}/\sqrt{\mathrm{Hz}}$)')
 
     if ret:
@@ -215,28 +216,28 @@ def compare_traces(dfs, gains, freqlim, Qs=1.54, f0s=4.552, Z12s=31.58, leg=None
         elif isinstance(Qs, (list, np.ndarray)) and len(Qs) == len(dfs):
             Q = Qs[i]
         else:
-            print "Qs must have the same length as dfs or must be a float."
+            print("Qs must have the same length as dfs or must be a float.")
 
         if isinstance(f0s, (float)):
             f0 = f0s
         elif isinstance(f0s, (list, np.ndarray)) and len(f0s) == len(dfs):
             f0 = f0s[i]
         else:
-            print "f0s must have the same length as dfs or must be a float."
+            print("f0s must have the same length as dfs or must be a float.")
 
         if isinstance(Z12s, float):
             Z12 = Z12s
         elif isinstance(Z12s, (list, np.ndarray)) and len(Z12s) == len(dfs):
             Z12 = Z12s[i]
         else:
-            print "Z12s must have the same length as dfs or must be a float."
+            print("Z12s must have the same length as dfs or must be a float.")
 
         if isinstance(gains, (float)):
             G = gains
         elif isinstance(gains, (list, np.ndarray)) and len(gains) == len(dfs):
             G = gains[i]
         else:
-            print "f0s must have the same length as dfs or must be a float."
+            print("f0s must have the same length as dfs or must be a float.")
 
         f, cal = get_geophone_spectrum(df, G, freqlim=freqlim, Q=Q, f0=f0, Z12=Z12, do_imshow=False,
                                        do_plot=False, ret=True, name=leg[i], do_meters_per_sqrt_Hz=psd_units)
@@ -276,28 +277,28 @@ def subtract_traces(dfs, gains, freqlim, Qs=1.54, f0s=4.552, Z12s=31.58, leg=Non
         elif isinstance(Qs, (list, np.ndarray)) and len(Qs) == len(dfs):
             Q = Qs[i]
         else:
-            print "Qs must have the same length as dfs or must be a float."
+            print("Qs must have the same length as dfs or must be a float.")
 
         if isinstance(f0s, (float)):
             f0 = f0s
         elif isinstance(f0s, (list, np.ndarray)) and len(f0s) == len(dfs):
             f0 = f0s[i]
         else:
-            print "f0s must have the same length as dfs or must be a float."
+            print("f0s must have the same length as dfs or must be a float.")
 
         if isinstance(Z12s, (float)):
             Z12 = Z12s
         elif isinstance(Z12s, (list, np.ndarray)) and len(Z12s) == len(dfs):
             Z12 = Z12s[i]
         else:
-            print "Z12s must have the same length as dfs or must be a float."
+            print("Z12s must have the same length as dfs or must be a float.")
 
         if isinstance(gains, (float)):
             G = gains
         elif isinstance(gains, (list, np.ndarray)) and len(gains) == len(dfs):
             G = gains[i]
         else:
-            print "f0s must have the same length as dfs or must be a float."
+            print("f0s must have the same length as dfs or must be a float.")
 
         if i == 0:
             f, cal0 = get_geophone_spectrum(df, G, freqlim=freqlim, Q=Q, f0=f0, Z12=Z12, do_imshow=False,
@@ -355,7 +356,7 @@ def process_calibration_measurement(df_vout, df_vin, fit_domain=[0.5, 100]):
         success = True
     except RuntimeError:
         success = False
-        print "Error in fitting"
+        print("Error in fitting")
 
     fplot = np.logspace(-1, 2, 1E3)
     plt.figure(figsize=(6., 4.))
