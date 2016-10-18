@@ -175,7 +175,7 @@ def save_figure(fig, save_path=None, open_explorer=False):
     file_exists = True
     i = 0
     while file_exists:
-        idx = str(1000 + i)
+        idx = str(100000 + i)
         save_path = os.path.join(base_path, "%s_figure_%s.png"%(date, idx[1:]))
         if not os.path.isfile(save_path):
             break
