@@ -299,7 +299,7 @@ def fit_exp(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartf
                                    showstartfit=showstartfit, label=label)#, Dfun=jacobian, col_deriv=1)
 
     if verbose:
-        parnames = ['Offset', 'Amplitude', '1/e time']
+        parnames = ['Offset', 'Amplitude', chr(964)]
         print(tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
                        tablefmt="rst", floatfmt="", numalign="center", stralign='left'))
 
@@ -370,7 +370,7 @@ def fit_decaysin(xdata, ydata, fitparams=None, domain=None, showfit=False, shows
                                    showstartfit=showstartfit, label=label, **kwarg)
 
     if verbose:
-        parnames = ['Amplitude', 'Frequency', 'Phi', '1/e time', 'Offset', 'Start time']
+        parnames = ['Amplitude', 'Frequency', chr(966), chr(964), 'Offset', 'Start time']
         print(tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
                        tablefmt="rst", floatfmt="", numalign="center", stralign='left'))
 
@@ -411,7 +411,7 @@ def fit_sin(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartf
                                    showstartfit=showstartfit, label=label, **kwarg)
 
     if verbose:
-        parnames = ['Amplitude', 'Frequency (Hz)', 'Phi (deg)', 'Offset']
+        parnames = ['Amplitude', 'Frequency (Hz)', chr(966), 'Offset']
         print(tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
                        tablefmt="rst", floatfmt="", numalign="center", stralign='left'))
 
@@ -458,9 +458,9 @@ def fit_gauss(xdata, ydata, fitparams=None, no_offset=False, domain=None, showfi
 
     if verbose:
         if no_offset:
-            parnames = ['Amplitude', 'Center', 'Sigma']
+            parnames = ['Amplitude', chr(956), chr(963)]
         else:
-            parnames = ['Offset', 'Amplitude', 'Center', 'Sigma']
+            parnames = ['Offset', 'Amplitude', chr(956), chr(963)]
 
         print(tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
                        tablefmt="rst", floatfmt="", numalign="center", stralign='left'))
@@ -587,7 +587,7 @@ def fit_s11(xdata, ydata, mode='oneport', fitparams=None, domain=None, showfit=F
                                        parambounds=([0, 0, 0, -np.inf, -np.inf], np.inf),
                                        domain=None, showfit=showfit,
                                        showstartfit=showstartfit, label=label, **kwarg)
-        names = ['f0', 'kr', 'eps', 'df', 'scale']
+        names = ['f0', chr(954), chr(949), 'df', 'scale']
     else:
         params, param_errs = fitbetter(fitdatax, fitdatay, s11_mag_twoport, fitparams,
                                        parambounds=([0, 0, 0, -np.inf, -np.inf], np.inf),
@@ -608,7 +608,7 @@ def fit_fano(xdata, ydata, fitparams=None, domain=None, showfit=False, showstart
     Fit a fano lineshape. Uses fano_func.
     :param xdata: Frequency points
     :param ydata: Power in W
-    :param fitparams: [w0, fwhm, q, scale]
+    :param fitparams: [w0, fwhm, q (fano factor), scale]
     :param domain: Tuple
     :param showfit: True/False
     :param showstartfit: True/False
@@ -646,7 +646,7 @@ def fit_lor_asym(xdata, ydata, fitparams=None, domain=None, showfit=False, shows
     See also fit_fano
     :param xdata: Frequency points
     :param ydata: S_21 Power in W
-    :param fitparams: [w0, fwhm, q, scale]
+    :param fitparams: [w0, fwhm, asymmetry param, scale]
     :param domain: Tuple
     :param showfit: True/False
     :param showstartfit: True/False
@@ -670,7 +670,7 @@ def fit_lor_asym(xdata, ydata, fitparams=None, domain=None, showfit=False, shows
                                    showstartfit=showstartfit, label=label, **kwarg)
 
     if verbose:
-        parnames = ['f0', 'FWHM', 'Gamma', 'Amplitude']
+        parnames = ['f0', 'FWHM', chr(947), 'Amplitude']
         print(tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
                        tablefmt="rst", floatfmt="", numalign="center", stralign='left'))
 
