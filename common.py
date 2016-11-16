@@ -104,7 +104,7 @@ def find_nearest(array, value):
     Finds the nearest value in array. Returns index of array for which this is true.
     """
     idx=(np.abs(array-value)).argmin()
-    return idx
+    return np.int(idx)
 
 def moving_average(ydata, window_size):
     """
