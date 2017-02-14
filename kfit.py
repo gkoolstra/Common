@@ -180,8 +180,18 @@ def fit_kinetic_fraction(xdata, ydata, fitparams=None, Tc_fixed=False, domain=No
     if Tc_fixed:
         fitparams = fitparams[:2]
 
+    def kinfunc_jac(x, *p):
+        f0, alpha, Tc = p
+        a = 1 - (x/Tc)**4
+        b = (1 + alpha/a)**(-3/2.)
+
+        df_dalpha = -f0*b/(2*a)
+        df_dTc = 2 * b * f0 * x**4 * alpha / (a**2 * Tc**5)
+        df_df0 = b**(1/3.)
+        return np.hstack([df_df0, df_dalpha, df_dTc])
+
     params, param_errs = fitbetter(fitdatax, fitdatay, kinfunc, fitparams, domain=None, showfit=showfit,
-                                   showstartfit=showstartfit, label=label, **kwarg)
+                                   showstartfit=showstartfit, label=label, jac=kinfunc_jac, **kwarg)
 
     if verbose:
         parnames = ['f0', 'Kinetic Inductance fraction', 'Tc']
@@ -756,8 +766,9 @@ def kinfunc(x, *p):
         Tc = 1.2
         print("Assuming Tc = %.2f K" % Tc)
 
-    return f0 * (1 - alpha / 2. * 1 / (1 - (x / Tc) ** 4))
-
+    #f0s = f0 * (1 - alpha / 2. * 1 / (1 - (x / Tc) ** 4))
+    f0s = f0 * (1 + alpha / (1 - (x / Tc) ** 4)) ** (-1 / 2.)
+    return f0s.flatten()
 
 def twolorfunc(x, *p):
     """
