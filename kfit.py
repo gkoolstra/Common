@@ -112,7 +112,7 @@ def fitbetter(xdata, ydata, fitfunc, fitparams, parambounds=None, domain=None, s
 #######################################################################
 #######################################################################
 
-def fit_lor(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False,
+def fit_lor(xdata, ydata, fitparams=None, no_offset=False, domain=None, showfit=False, showstartfit=False,
             label="", verbose=True, **kwarg):
     """
     Fit a Lorentzian; returns
@@ -139,16 +139,37 @@ def fit_lor(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartf
         fitparams[2] = fitdatax[np.argmax(fitdatay)]
         fitparams[3] = (max(fitdatax) - min(fitdatax)) / 10.
 
+        if no_offset:
+            fitparams.pop(0)
+    elif len(fitparams) == 4 and no_offset:
+        raise ValueError("no_offset is True, fitparams should be a list of length 3.")
+
+    def lorfunc_jac(x, *p):
+        if no_offset:
+            amp, f0, hwhm = p
+        else:
+            offset, amp, f0, hwhm = p
+
+        df_damp = 1 / (1 + (x-f0)**2 / hwhm**2)
+        df_df0 = 2 * amp * (x-f0) / (hwhm**2 * (1 + (x-f0)**2/hwhm**2)**2)
+        df_dhwhm = 2 * amp * (x-f0)**2 / (hwhm**3 * (1 + (x-f0)**2/hwhm**2)**2)
+
+        if no_offset:
+            return np.transpose(np.vstack([df_damp, df_df0, df_dhwhm]))
+        else:
+            df_doffset = np.ones(len(x))
+            return np.transpose(np.vstack([df_doffset, df_damp, df_df0, df_dhwhm]))
+
     params, param_errs = fitbetter(fitdatax, fitdatay, lorfunc, fitparams, domain=None, showfit=showfit,
-                                   showstartfit=showstartfit, label=label, **kwarg)
+                                   showstartfit=showstartfit, label=label, jac=lorfunc_jac, **kwarg)
 
     if verbose:
         parnames = ['Offset', 'Amplitude', 'f0', 'HWHM']
+        if no_offset:
+            parnames.pop(0)
+
         print(tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
                        tablefmt="rst", floatfmt="", numalign="center", stralign='left'))
-
-    # Make sure the hwhm is positive
-    params[3] = abs(params[3])
 
     return params, param_errs
 
@@ -188,7 +209,7 @@ def fit_kinetic_fraction(xdata, ydata, fitparams=None, Tc_fixed=False, domain=No
         df_dalpha = -f0*b/(2*a)
         df_dTc = 2 * b * f0 * x**4 * alpha / (a**2 * Tc**5)
         df_df0 = b**(1/3.)
-        return np.hstack([df_df0, df_dalpha, df_dTc])
+        return np.transpose(np.vstack([df_df0, df_dalpha, df_dTc]))
 
     params, param_errs = fitbetter(fitdatax, fitdatay, kinfunc, fitparams, domain=None, showfit=showfit,
                                    showstartfit=showstartfit, label=label, jac=kinfunc_jac, **kwarg)
@@ -747,7 +768,10 @@ def lorfunc(x, *p):
     :param x: Frequency points
     :return: p[0]+p[1]/(1+(x-p[2])**2/p[3]**2)
     """
-    return p[0] + p[1] / (1 + (x - p[2]) ** 2 / p[3] ** 2)
+    if len(p) == 3:
+        return p[0] / (1 + (x - p[1]) ** 2 / p[2] ** 2)
+    else:
+        return p[0] + p[1] / (1 + (x - p[2]) ** 2 / p[3] ** 2)
 
 
 def kinfunc(x, *p):
@@ -768,7 +792,7 @@ def kinfunc(x, *p):
 
     #f0s = f0 * (1 - alpha / 2. * 1 / (1 - (x / Tc) ** 4))
     f0s = f0 * (1 + alpha / (1 - (x / Tc) ** 4)) ** (-1 / 2.)
-    return f0s.flatten()
+    return f0s
 
 def twolorfunc(x, *p):
     """
