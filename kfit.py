@@ -677,7 +677,7 @@ def fit_lor_asym(xdata, ydata, fitparams=None, domain=None, showfit=False, shows
     See also fit_fano
     :param xdata: Frequency points
     :param ydata: S_21 Power in W
-    :param fitparams: [w0, fwhm, asymmetry param, scale]
+    :param fitparams: [peak amplitude, f0, fwhm, parallel capacitance]
     :param domain: Tuple
     :param showfit: True/False
     :param showstartfit: True/False
@@ -701,7 +701,7 @@ def fit_lor_asym(xdata, ydata, fitparams=None, domain=None, showfit=False, shows
                                    showstartfit=showstartfit, label=label, **kwarg)
 
     if verbose:
-        parnames = ['f0', 'FWHM', chr(947), 'Amplitude']
+        parnames = ['Amplitude', 'f0', 'FWHM', 'Parallel capacitance']
         print(tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
                        tablefmt="rst", floatfmt="", numalign="center", stralign='left'))
 
@@ -790,7 +790,6 @@ def kinfunc(x, *p):
         Tc = 1.2
         print("Assuming Tc = %.2f K" % Tc)
 
-    #f0s = f0 * (1 - alpha / 2. * 1 / (1 - (x / Tc) ** 4))
     f0s = f0 * (1 + alpha / (1 - (x / Tc) ** 4)) ** (-1 / 2.)
     return f0s
 
@@ -807,11 +806,10 @@ def asym_lorfunc(x, *p):
     """
     Asymmetric Lorentzian profile derived with capacitor in parallel.
     :param x: Frequency points
-    :param p: [f0, fwhm, gamma, scale]
-    :return: np.abs(p[3] /(1+2*1j*(x-p[0])/p[1]) + p[3] * 2*x*p[2]/p[0] / (+1j + 2*x*p[2]/p[0]))**2
+    :param p: [peak amplitude, f0, fwhm, parallel capacitance]
+    :return: np.abs(np.sqrt(p[0])/(1 + 1j * (x - p[1]) / p[2]) + np.sqrt(p[0]) * 2 * x * p[3] / p[1] / (+1j + 2 * x * p[3] / p[1])) ** 2
     """
-    return np.abs(
-            p[3] / (1 + 2 * 1j * (x - p[0]) / p[1]) + p[3] * 2 * x * p[2] / p[0] / (+1j + 2 * x * p[2] / p[0])) ** 2
+    return np.abs(np.sqrt(p[0]) / (1 + 1j * 2 * (x - p[1]) / p[2]) + np.sqrt(p[0]) * 2 * x * p[3] / p[1] / (+1j + 2 * x * p[3] / p[1])) ** 2
 
 
 def fano_func(x, *p):
