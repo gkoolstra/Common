@@ -611,13 +611,13 @@ def get_psd(t, y, verbose=False, window=True):
         n = len(y) # length of the signal
         T = n*dt
         frq = np.arange(n)/float(T) # two sides frequency range
-        frq = frq[range(n/2)] # one side frequency range
+        frq = frq[range(int(n/2))] # one side frequency range
 
         if window:
             y *= np.hanning(n)
 
         Y = np.fft.fft(y)*np.sqrt(T)/float(n) # fft computing and normalization
-        Y = Y[range(n/2)] # maps the negative frequencies on the positive ones. Only works for real input signals!
+        Y = Y[range(int(n/2))] # maps the negative frequencies on the positive ones. Only works for real input signals!
 
         if verbose:
             print("Maximum contribution to signal is %.2e for a frequency of %.2e Hz"\
