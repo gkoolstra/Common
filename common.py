@@ -534,7 +534,7 @@ def get_noof_photons_in_cavity(P, f0, Q):
     w0 = 2*np.pi*f0
     P_W = 10**((P-30)/10.)
     kappa = w0/Q
-    return P_W/(hbar*w0*kappa/(2*np.pi))
+    return P_W/(hbar*w0*kappa)
 
 def get_noof_photons_in_input(P, f):
     """
