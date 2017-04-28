@@ -50,8 +50,24 @@ def get_rsquare(ydata, ydatafit):
     return 1 - residual_sum_of_squares / total_sum_of_squares
 
 
+def plot_fitresult(xdata, ydata, bestfitparams, fitparam_errors, fitparam_names=None):
+    # To print the fit result we use the legend feature from pyplot. This is nice because it has an algorithm that
+    # can determine the best place to print the text within the figure. We plot the first few datapoints (not visible)
+    # and assign labels to those. Then we can use the loc = 0 to let pyplot figure out the best location.
+    if fitparam_names is None:
+        fitparam_names = ["par%d" % k for k in range(len(bestfitparams))]
+
+    # Remember the limits of the y-axis so that we don't change it
+    ylims = plt.ylim()
+    for k in range(len(bestfitparams)):
+        plt.plot(xdata[k], ydata[k],
+                 label=r"%s = %.2e $\pm$ %.2e" % (fitparam_names[k], bestfitparams[k], fitparam_errors[k]), alpha=0)
+
+    plt.legend(loc=0, frameon=False, prop={'size': 8}, title="Fit result")
+    plt.ylim(ylims)
+
 def fitbetter(xdata, ydata, fitfunc, fitparams, parambounds=None, domain=None, showfit=False, showstartfit=False,
-              showdata=True, label="", mark_data='bo', mark_fit='r-', **kwargs):
+              showdata=True, mark_data='ko', mark_fit='r-', **kwargs):
     """
     Uses curve_fit from scipy.optimize to fit a non-linear least squares function to ydata, xdata
     Note: when applying bounds the fit method used is a different one than with an unconstrained fit. It's good
@@ -97,11 +113,10 @@ def fitbetter(xdata, ydata, fitfunc, fitparams, parambounds=None, domain=None, s
 
     if showfit:
         if showdata:
-            plt.plot(fitdatax, fitdatay, mark_data, label=label + " data")
+            plt.plot(fitdatax, fitdatay, mark_data, label="data")
         if showstartfit:
-            plt.plot(fitdatax, fitfunc(fitdatax, *startparams), label=label + " startfit")
-        plt.plot(fitdatax, fitfunc(fitdatax, *bestfitparams), mark_fit, label=label + " fit")
-        if label != '': plt.legend()
+            plt.plot(fitdatax, fitfunc(fitdatax, *startparams), label="startfit")
+        plt.plot(fitdatax, fitfunc(fitdatax, *bestfitparams), mark_fit, label="fit")
 
     return bestfitparams, fitparam_errors
 
@@ -113,7 +128,7 @@ def fitbetter(xdata, ydata, fitfunc, fitparams, parambounds=None, domain=None, s
 #######################################################################
 
 def fit_lor(xdata, ydata, fitparams=None, no_offset=False, domain=None, showfit=False, showstartfit=False,
-            label="", verbose=True, **kwarg):
+            verbose=True, **kwarg):
     """
     Fit a Lorentzian; returns
     The quality factor can be found by Q = center/fwhm = center/(2*hwhm)
@@ -161,7 +176,7 @@ def fit_lor(xdata, ydata, fitparams=None, no_offset=False, domain=None, showfit=
             return np.transpose(np.vstack([df_doffset, df_damp, df_df0, df_dhwhm]))
 
     params, param_errs = fitbetter(fitdatax, fitdatay, lorfunc, fitparams, domain=None, showfit=showfit,
-                                   showstartfit=showstartfit, label=label, jac=lorfunc_jac, **kwarg)
+                                   showstartfit=showstartfit, jac=lorfunc_jac, **kwarg)
 
     if verbose:
         parnames = ['Offset', 'Amplitude', 'f0', 'HWHM']
@@ -171,11 +186,13 @@ def fit_lor(xdata, ydata, fitparams=None, no_offset=False, domain=None, showfit=
         print(tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
                        tablefmt="rst", floatfmt="", numalign="center", stralign='left'))
 
+        plot_fitresult(fitdatax, fitdatay, params, param_errs, fitparam_names=parnames)
+
     return params, param_errs
 
 
 def fit_kinetic_fraction(xdata, ydata, fitparams=None, Tc_fixed=False, domain=None, showfit=False, showstartfit=False,
-                         label="", verbose=True, **kwarg):
+                         verbose=True, **kwarg):
     """
     Fits resonance frequencies (absolute, not shifts) vs. temperature due to kinetic inductance. Uses kinfunc
     Returns [f0, alpha, Tc]
@@ -212,18 +229,20 @@ def fit_kinetic_fraction(xdata, ydata, fitparams=None, Tc_fixed=False, domain=No
         return np.transpose(np.vstack([df_df0, df_dalpha, df_dTc]))
 
     params, param_errs = fitbetter(fitdatax, fitdatay, kinfunc, fitparams, domain=None, showfit=showfit,
-                                   showstartfit=showstartfit, label=label, jac=kinfunc_jac, **kwarg)
+                                   showstartfit=showstartfit, jac=kinfunc_jac, **kwarg)
 
     if verbose:
         parnames = ['f0', 'Kinetic Inductance fraction', 'Tc']
         print(tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
                        tablefmt="rst", floatfmt="", numalign="center", stralign='left'))
 
+        plot_fitresult(fitdatax, fitdatay, params, param_errs, fitparam_names=parnames)
+
     return params, param_errs
 
 
 def fit_double_lor(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False,
-                   label="", verbose=True, **kwarg):
+                   verbose=True, **kwarg):
     """
     Fits two lorentzians. Uses twolorfunc. Convert to Q: center1/2*hwhm1, center2/2*hwhm2
     :param xdata: Frequency
@@ -246,18 +265,20 @@ def fit_double_lor(xdata, ydata, fitparams=None, domain=None, showfit=False, sho
         print("Please provide some initial guesses.")
 
     params, param_errs = fitbetter(fitdatax, fitdatay, twolorfunc, fitparams, domain=None, showfit=showfit,
-                                   showstartfit=showstartfit, label=label)
+                                   showstartfit=showstartfit)
 
     if verbose:
         parnames = ['Offset', 'A1', 'f1', 'HWHM1', 'A2', 'f2', 'HWHM2']
         print(tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
                        tablefmt="rst", floatfmt="", numalign="center", stralign='left'))
 
+        plot_fitresult(fitdatax, fitdatay, params, param_errs, fitparam_names=parnames)
+
     return params, param_errs
 
 
 def fit_N_gauss(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False,
-                label="", verbose=True, no_offset=False, **kwarg):
+                verbose=True, no_offset=False, **kwarg):
     """
     Fits a series of N Gaussian peaks or dips.
     If no_offset = True : Uses Ngaussfunc_no_offset
@@ -284,10 +305,10 @@ def fit_N_gauss(xdata, ydata, fitparams=None, domain=None, showfit=False, showst
     if no_offset:
         params, param_errs = fitbetter(fitdatax, fitdatay, Ngaussfunc_no_offset, fitparams, domain=None,
                                        showfit=showfit,
-                                       showstartfit=showstartfit, label=label, **kwarg)
+                                       showstartfit=showstartfit, **kwarg)
     else:
         params, param_errs = fitbetter(fitdatax, fitdatay, Ngaussfunc, fitparams, domain=None, showfit=showfit,
-                                       showstartfit=showstartfit, label=label, **kwarg)
+                                       showstartfit=showstartfit, **kwarg)
 
     if verbose:
         idx = 0
@@ -295,10 +316,12 @@ def fit_N_gauss(xdata, ydata, fitparams=None, domain=None, showfit=False, showst
             print("Parameter {} : {} +/- {}".format(idx, par, err))
             idx += 1
 
+        plot_fitresult(fitdatax, fitdatay, params, param_errs, fitparam_names=None)
+
     return params, param_errs
 
 
-def fit_exp(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False, label="",
+def fit_exp(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False,
             verbose=True, **kwarg):
     """
     Fit exponential decay of the form (p[0]+p[1]*exp(-x/p[2])). Uses expfunc.
@@ -327,17 +350,19 @@ def fit_exp(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartf
         return [np.ones(len(xdata)), np.exp(-xdata/fitparams[2]), fitparams[1]/fitparams[2]**2 * np.exp(-xdata/fitparams[2])]
 
     params, param_errs = fitbetter(fitdatax, fitdatay, expfunc, fitparams, domain=None, showfit=showfit,
-                                   showstartfit=showstartfit, label=label)#, Dfun=jacobian, col_deriv=1)
+                                   showstartfit=showstartfit)#, Dfun=jacobian, col_deriv=1)
 
     if verbose:
         parnames = ['Offset', 'Amplitude', chr(964)]
         print(tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
                        tablefmt="rst", floatfmt="", numalign="center", stralign='left'))
 
+        plot_fitresult(fitdatax, fitdatay, params, param_errs, fitparam_names=parnames)
+
     return params, param_errs
 
 
-def fit_pulse_err(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False, label=""):
+def fit_pulse_err(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False, ):
     """
     Fit pulse error decay (p[0]+p[1]*(1-p[2])^x). Uses pulse_errfunc
     :param xdata: x-data
@@ -361,12 +386,12 @@ def fit_pulse_err(xdata, ydata, fitparams=None, domain=None, showfit=False, show
         fitparams[1] = fitdatay[0] - fitdatay[-1]
 
     params, param_errs = fitbetter(fitdatax, fitdatay, pulse_errfunc, fitparams, domain=None, showfit=showfit,
-                                   showstartfit=showstartfit, label=label)
+                                   showstartfit=showstartfit)
 
     return params, param_errs
 
 
-def fit_decaysin(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False, label="", verbose=True,
+def fit_decaysin(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False, verbose=True,
                  **kwarg):
     """
     Fits decaying sine wave of form: p[0]*np.sin(2.*pi*p[1]*x+p[2]*pi/180.)*np.e**(-1.*(x-p[5])/p[3])+p[4]
@@ -398,17 +423,18 @@ def fit_decaysin(xdata, ydata, fitparams=None, domain=None, showfit=False, shows
         fitparams[3] = (max(fitdatax) - min(fitdatax))
 
     params, param_errs = fitbetter(fitdatax, fitdatay, decaysin, fitparams, domain=None, showfit=showfit,
-                                   showstartfit=showstartfit, label=label, **kwarg)
+                                   showstartfit=showstartfit, **kwarg)
 
     if verbose:
         parnames = ['Amplitude', 'Frequency', chr(966), chr(964), 'Offset', 'Start time']
         print(tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
                        tablefmt="rst", floatfmt="", numalign="center", stralign='left'))
+        plot_fitresult(fitdatax, fitdatay, params, param_errs, fitparam_names=parnames)
 
     return params, param_errs
 
 
-def fit_sin(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False, label="", verbose=True,
+def fit_sin(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False, verbose=True,
             **kwarg):
     """
     Fits sin wave of form: p[0]*np.sin(2.*pi*p[1]*x+p[2]*pi/180.)+p[3].
@@ -439,17 +465,18 @@ def fit_sin(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartf
         fitparams[2] = (cmath.phase(fft_val) - np.pi / 2.) * 180. / np.pi
 
     params, param_errs = fitbetter(fitdatax, fitdatay, sinfunc, fitparams, domain=None, showfit=showfit,
-                                   showstartfit=showstartfit, label=label, **kwarg)
+                                   showstartfit=showstartfit, **kwarg)
 
     if verbose:
         parnames = ['Amplitude', 'Frequency (Hz)', chr(966), 'Offset']
         print(tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
                        tablefmt="rst", floatfmt="", numalign="center", stralign='left'))
+        plot_fitresult(fitdatax, fitdatay, params, param_errs, fitparam_names=parnames)
 
     return params, param_errs
 
 
-def fit_gauss(xdata, ydata, fitparams=None, no_offset=False, domain=None, showfit=False, showstartfit=False, label="",
+def fit_gauss(xdata, ydata, fitparams=None, no_offset=False, domain=None, showfit=False, showstartfit=False,
               verbose=True, **kwarg):
     """
     Fit a gaussian. You can choose to include an offset, using no_offset=True/False. Adjust fitparams accordingly:
@@ -485,7 +512,7 @@ def fit_gauss(xdata, ydata, fitparams=None, no_offset=False, domain=None, showfi
         fitfunc = gaussfunc
 
     params, param_errs = fitbetter(fitdatax, fitdatay, fitfunc, fitparams, domain=None, showfit=showfit,
-                                   showstartfit=showstartfit, label=label)
+                                   showstartfit=showstartfit)
 
     if verbose:
         if no_offset:
@@ -495,12 +522,13 @@ def fit_gauss(xdata, ydata, fitparams=None, no_offset=False, domain=None, showfi
 
         print(tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
                        tablefmt="rst", floatfmt="", numalign="center", stralign='left'))
+        plot_fitresult(fitdatax, fitdatay, params, param_errs, fitparam_names=parnames)
 
     return params, param_errs
 
 
 def fit_hanger(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False,
-               label="", verbose=True, **kwarg):
+               verbose=True, **kwarg):
     """
     Fit Hanger Transmission (S21) data taking into account asymmetry. Uses hangerfunc.
     :param xdata: Frequency points
@@ -530,18 +558,19 @@ def fit_hanger(xdata, ydata, fitparams=None, domain=None, showfit=False, showsta
         fitparams = [f0, abs(Qi), abs(Qc), 0., scale]
 
     params, param_errs = fitbetter(fitdatax, fitdatay, hangerfunc, fitparams, domain=domain, showfit=showfit,
-                                   showstartfit=showstartfit, label=label, **kwarg)
+                                   showstartfit=showstartfit, **kwarg)
 
     if verbose:
         parnames = ['f0', 'Qi', 'Qc', 'df', 'scale']
         print(tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
                        tablefmt="rst", floatfmt="", numalign="center", stralign='left'))
+        plot_fitresult(fitdatax, fitdatay, params, param_errs, fitparam_names=parnames)
 
     return params, param_errs
 
 
 def fit_parabola(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False,
-                 label="", verbose=True, **kwarg):
+                 verbose=True, **kwarg):
     """
     Fit a parabola. Uses parabolafunc. Specify fitparams as [p0, p1, p2] where y = p0 + p1*(x-p2)**2
     :param xdata: x-data
@@ -565,18 +594,19 @@ def fit_parabola(xdata, ydata, fitparams=None, domain=None, showfit=False, shows
         fitdatay = ydata
 
     params, param_errs = fitbetter(fitdatax, fitdatay, parabolafunc, fitparams, domain=None, showfit=showfit,
-                                   showstartfit=showstartfit, label=label, **kwarg)
+                                   showstartfit=showstartfit, **kwarg)
 
     if verbose:
         parnames = ["a%d" % idx for idx in range(len(params))]
         print(tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
                        tablefmt="rst", floatfmt="", numalign="center", stralign='left'))
+        plot_fitresult(fitdatax, fitdatay, params, param_errs, fitparam_names=parnames)
 
     return params, param_errs
 
 
 def fit_s11(xdata, ydata, mode='oneport', fitparams=None, domain=None, showfit=False, showstartfit=False,
-            label="", verbose=True, **kwarg):
+            verbose=True, **kwarg):
     """
     Fit an S11 curve. For mode='oneport' this code uses s11_mag_func_asymmetric. If mode='twoport' the code uses
     s11_mag_twoport. In both cases the fit function can fit asymmetric line shapes, represented by the parameter df.
@@ -617,24 +647,25 @@ def fit_s11(xdata, ydata, mode='oneport', fitparams=None, domain=None, showfit=F
         params, param_errs = fitbetter(fitdatax, fitdatay, s11_mag_func_asymmetric, fitparams,
                                        parambounds=([0, 0, 0, -np.inf, -np.inf], np.inf),
                                        domain=None, showfit=showfit,
-                                       showstartfit=showstartfit, label=label, **kwarg)
+                                       showstartfit=showstartfit, **kwarg)
         names = ['f0', chr(954), chr(949), 'df', 'scale']
     else:
         params, param_errs = fitbetter(fitdatax, fitdatay, s11_mag_twoport, fitparams,
                                        parambounds=([0, 0, 0, -np.inf, -np.inf], np.inf),
                                        domain=None, showfit=showfit,
-                                       showstartfit=showstartfit, label=label, **kwarg)
+                                       showstartfit=showstartfit, **kwarg)
         names = ['f0', 'Qc', 'Qi', 'df', 'scale']
 
     if verbose:
         print(tabulate(zip(names, params, param_errs), headers=["Parameter", "Value", "Std"],
                        tablefmt="rst", floatfmt="", numalign="center", stralign='left'))
+        plot_fitresult(fitdatax, fitdatay, params, param_errs, fitparam_names=names)
 
     return params, param_errs
 
 
 def fit_fano(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False,
-             label="", verbose=True, **kwarg):
+             verbose=True, **kwarg):
     """
     Fit a fano lineshape. Uses fano_func.
     :param xdata: Frequency points
@@ -660,18 +691,19 @@ def fit_fano(xdata, ydata, fitparams=None, domain=None, showfit=False, showstart
         fitparams[2] = 10.
 
     params, param_errs = fitbetter(fitdatax, fitdatay, fano_func, fitparams, domain=None, showfit=showfit,
-                                   showstartfit=showstartfit, label=label, **kwarg)
+                                   showstartfit=showstartfit, **kwarg)
 
     if verbose:
         parnames = ['f0', 'FWHM', 'Fano factor', 'Amplitude']
         print(tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
                        tablefmt="rst", floatfmt="", numalign="center", stralign='left'))
+        plot_fitresult(fitdatax, fitdatay, params, param_errs, fitparam_names=parnames)
 
     return params, param_errs
 
 
 def fit_lor_asym(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False,
-                 label="", verbose=True, **kwarg):
+                 verbose=True, **kwarg):
     """
     Fit asymmetric lorentzian lineshape, derived from a capacitor in series with the LC circuit. Uses asym_lorfunc.
     See also fit_fano
@@ -698,18 +730,19 @@ def fit_lor_asym(xdata, ydata, fitparams=None, domain=None, showfit=False, shows
         fitparams[2] = fitparams[0] / 10.
 
     params, param_errs = fitbetter(fitdatax, fitdatay, asym_lorfunc, fitparams, domain=None, showfit=showfit,
-                                   showstartfit=showstartfit, label=label, **kwarg)
+                                   showstartfit=showstartfit, **kwarg)
 
     if verbose:
         parnames = ['Amplitude', 'f0', 'FWHM', 'Parallel capacitance']
         print(tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
                        tablefmt="rst", floatfmt="", numalign="center", stralign='left'))
+        plot_fitresult(fitdatax, fitdatay, params, param_errs, fitparam_names=parnames)
 
     return params, param_errs
 
 
 def fit_poly(xdata, ydata, mode=None, fitparams=None, domain=None, showfit=False, showstartfit=False,
-             label="", verbose=True, **kwarg):
+             verbose=True, **kwarg):
     """
     Fit a polynomial. Uses polyfunc. Specify fitparams as [p0, p1, p2, ...] where
     y = p0 + p1*x + p2*x**2 + ...
@@ -744,13 +777,14 @@ def fit_poly(xdata, ydata, mode=None, fitparams=None, domain=None, showfit=False
         fitfunc_string = "Fit function: y = a0 + a1*x + a2*x**3 + ..."
 
     params, param_errs = fitbetter(fitdatax, fitdatay, fitfunction, fitparams, domain=None, showfit=showfit,
-                                   showstartfit=showstartfit, label=label, **kwarg)
+                                   showstartfit=showstartfit, **kwarg)
 
     if verbose:
         print(fitfunc_string)
         parnames = ["a%d" % idx for idx in range(len(params))]
         print(tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
                        tablefmt="rst", floatfmt="", numalign="center", stralign='left'))
+        plot_fitresult(fitdatax, fitdatay, params, param_errs, fitparam_names=parnames)
 
     return params, param_errs
 
@@ -772,7 +806,6 @@ def lorfunc(x, *p):
         return p[0] / (1 + (x - p[1]) ** 2 / p[2] ** 2)
     else:
         return p[0] + p[1] / (1 + (x - p[2]) ** 2 / p[3] ** 2)
-
 
 def kinfunc(x, *p):
     """
