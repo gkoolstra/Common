@@ -788,7 +788,42 @@ def fit_poly(xdata, ydata, mode=None, fitparams=None, domain=None, showfit=False
 
     return params, param_errs
 
+def fit_powerlaw(xdata, ydata, mode=None, fitparams=None, domain=None, showfit=False, showstartfit=False,
+                 verbose=True, **kwarg):
+    """
+    Fit a power law function of the form y = p[0] + p[1] * x ** p[2]
+    :param xdata: x-data
+    :param ydata: y-data
+    :param fitparams: [Offset, Multiplicative factor, Exponent]
+    :param domain: Tuple
+    :param showfit: True/False
+    :param showstartfit: True/False
+    :param label: String
+    :param verbose: True/False. Prints the fitresults.
+    :return: Fitresult, Fiterror
+    """
+    if fitparams is None:
+        print("Please specify fit parameters in function input")
+        return
 
+    if domain is not None:
+        fitdatax, fitdatay = selectdomain(xdata, ydata, domain)
+    else:
+        fitdatax = xdata
+        fitdatay = ydata
+
+    fitfunc_string = "y = p[0] + p[1] * x ^ p[2]"
+    params, param_errs = fitbetter(fitdatax, fitdatay, powerlawfunc, fitparams, domain=None, showfit=showfit,
+                                   showstartfit=showstartfit, **kwarg)
+
+    if verbose:
+        print(fitfunc_string)
+        parnames = ["Offset", "Multiplicator", "Exponent"]
+        print(tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
+                       tablefmt="rst", floatfmt="", numalign="center", stralign='left'))
+        plot_fitresult(fitdatax, fitdatay, params, param_errs, fitparam_names=parnames)
+
+    return params, param_errs
 ###########################################################
 ###########################################################
 #################### FIT FUNCTIONS ########################
@@ -806,6 +841,7 @@ def lorfunc(x, *p):
         return p[0] / (1 + (x - p[1]) ** 2 / p[2] ** 2)
     else:
         return p[0] + p[1] / (1 + (x - p[2]) ** 2 / p[3] ** 2)
+
 
 def kinfunc(x, *p):
     """
@@ -825,6 +861,7 @@ def kinfunc(x, *p):
 
     f0s = f0 * (1 + alpha / (1 - (x / Tc) ** 4)) ** (-1 / 2.)
     return f0s
+
 
 def twolorfunc(x, *p):
     """
@@ -1099,6 +1136,15 @@ def polyfunc_odd(x, *p):
         y += P * x ** (2*n+1)
     return y
 
+
+def powerlawfunc(x, *p):
+    """
+    Power law of order p[2]
+    :param x: x-data
+    :param p: [Offset, Multiplicative factor, Exponent]
+    :return: p[0] + p[1] * x ** (p[2])
+    """
+    return p[0] + p[1] * x ** (p[2])
 
 if __name__ == '__main__':
     pass
