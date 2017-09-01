@@ -5,6 +5,10 @@ import cmath, csv, os
 from tabulate import tabulate
 from scipy.signal import convolve2d
 
+def rgb(i, N, cmap=plt.cm.plasma):
+    cmap = matplotlib.cm.get_cmap('Spectral')
+    return cmap(i/float(N))
+
 def load_csv(filename, header_length=7, footer_length=2, ncols=3):
     """
     Load a csv file into a numpy array.
