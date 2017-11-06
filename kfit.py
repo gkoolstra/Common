@@ -362,7 +362,7 @@ def fit_exp(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartf
     return params, param_errs
 
 
-def fit_pulse_err(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False, ):
+def fit_pulse_err(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False):
     """
     Fit pulse error decay (p[0]+p[1]*(1-p[2])^x). Uses pulse_errfunc
     :param xdata: x-data
@@ -999,21 +999,6 @@ def hangerfunc(x, *p):
     Q0 = 1. / (1. / Qi + 1. / Qc)
     return scale * (-2. * Q0 * Qc + Qc ** 2. + Q0 ** 2. * (1. + Qc ** 2. * (2. * a + b) ** 2.)) / (
         Qc ** 2 * (1. + 4. * Q0 ** 2. * a ** 2.))
-
-
-def polynomial(x, *p):
-    """
-    Polynomial of order 9.
-    :param p: [offset (a0), linear (a1), quadratic (a2), ..., a9, center]
-    :param x: x-axis
-    :return: a0 + a1*(x-center) + a2*(x-center)**2 + ... + a9*(x-center)**9
-    """
-    return p[0] + p[1] * (x - p[-1]) + p[2] * (x - p[-1]) ** 2 + p[3] * (x - p[-1]) ** 3 + p[4] * (x - p[-1]) ** 4 + p[
-                                                                                                                         5] * (
-                                                                                                                                  x -
-                                                                                                                                  p[
-                                                                                                                                      -1]) ** 5 + \
-           p[6] * (x - p[-1]) ** 6 + p[7] * (x - p[-1]) ** 7 + p[8] * (x - p[-1]) ** 8 + p[9] * (x - p[-1]) ** 9
 
 
 def s11_mag_func(x, *p):
