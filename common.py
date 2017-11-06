@@ -6,7 +6,14 @@ from tabulate import tabulate
 from scipy.signal import convolve2d
 
 def rgb(i, N, cmap=plt.cm.plasma):
-    cmap = matplotlib.cm.get_cmap('Spectral')
+    """
+    Returns rgb-values from a discretized colormap. The color is i out of N indices.
+    :param i: integer ranging from 0 to N
+    :param N: Number of steps to discretize to colormap.
+    :param cmap: a matplotlib colormap instance
+    :return: rgb tuple.
+    """
+    cmap = matplotlib.cm.get_cmap(cmap)
     return cmap(i/float(N))
 
 def load_csv(filename, header_length=7, footer_length=2, ncols=3):
