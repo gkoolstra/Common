@@ -350,7 +350,7 @@ def fit_exp(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartf
         return [np.ones(len(xdata)), np.exp(-xdata/fitparams[2]), fitparams[1]/fitparams[2]**2 * np.exp(-xdata/fitparams[2])]
 
     params, param_errs = fitbetter(fitdatax, fitdatay, expfunc, fitparams, domain=None, showfit=showfit,
-                                   showstartfit=showstartfit)#, Dfun=jacobian, col_deriv=1)
+                                   showstartfit=showstartfit, **kwarg)#, Dfun=jacobian, col_deriv=1)
 
     if verbose:
         parnames = ['Offset', 'Amplitude', chr(964)]
@@ -512,7 +512,7 @@ def fit_gauss(xdata, ydata, fitparams=None, no_offset=False, domain=None, showfi
         fitfunc = gaussfunc
 
     params, param_errs = fitbetter(fitdatax, fitdatay, fitfunc, fitparams, domain=None, showfit=showfit,
-                                   showstartfit=showstartfit)
+                                   showstartfit=showstartfit, **kwarg)
 
     if verbose:
         if no_offset:
