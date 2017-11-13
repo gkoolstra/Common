@@ -13,27 +13,22 @@ fitting procedure.
 import numpy as np
 import math as math
 import matplotlib.pyplot as plt
-import scipy, sys, cmath
+import scipy, cmath
 import scipy.fftpack
 from scipy import optimize
 from tabulate import tabulate
-from . import common
-
 
 def argselectdomain(xdata, domain):
     ind = np.searchsorted(xdata, domain)
     return (ind[0], ind[1])
 
-
 def selectdomain(xdata, ydata, domain):
     ind = np.searchsorted(xdata, domain)
     return xdata[ind[0]:ind[1]], ydata[ind[0]:ind[1]]
 
-
 def zipsort(xdata, ydata):
     inds = np.argsort(xdata)
     return np.take(xdata, inds), np.take(ydata, inds, axis=0)
-
 
 def get_rsquare(ydata, ydatafit):
     """
@@ -48,7 +43,6 @@ def get_rsquare(ydata, ydatafit):
     total_sum_of_squares = np.sum((ydata - ybar) ** 2)
     residual_sum_of_squares = np.sum((ydata - ydatafit) ** 2)
     return 1 - residual_sum_of_squares / total_sum_of_squares
-
 
 def plot_fitresult(xdata, ydata, bestfitparams, fitparam_errors, fitparam_names=None):
     # To print the fit result we use the legend feature from pyplot. This is nice because it has an algorithm that
@@ -120,7 +114,6 @@ def fitbetter(xdata, ydata, fitfunc, fitparams, parambounds=None, domain=None, s
 
     return bestfitparams, fitparam_errors
 
-
 #######################################################################
 #######################################################################
 #################### WRAPPERS FOR FITFUNCTIONS ########################
@@ -190,7 +183,6 @@ def fit_lor(xdata, ydata, fitparams=None, no_offset=False, domain=None, showfit=
 
     return params, param_errs
 
-
 def fit_kinetic_fraction(xdata, ydata, fitparams=None, Tc_fixed=False, domain=None, showfit=False, showstartfit=False,
                          verbose=True, **kwarg):
     """
@@ -240,7 +232,6 @@ def fit_kinetic_fraction(xdata, ydata, fitparams=None, Tc_fixed=False, domain=No
 
     return params, param_errs
 
-
 def fit_double_lor(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False,
                    verbose=True, **kwarg):
     """
@@ -275,7 +266,6 @@ def fit_double_lor(xdata, ydata, fitparams=None, domain=None, showfit=False, sho
         plot_fitresult(fitdatax, fitdatay, params, param_errs, fitparam_names=parnames)
 
     return params, param_errs
-
 
 def fit_N_gauss(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False,
                 verbose=True, no_offset=False, **kwarg):
@@ -320,7 +310,6 @@ def fit_N_gauss(xdata, ydata, fitparams=None, domain=None, showfit=False, showst
 
     return params, param_errs
 
-
 def fit_exp(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False,
             verbose=True, **kwarg):
     """
@@ -361,7 +350,6 @@ def fit_exp(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartf
 
     return params, param_errs
 
-
 def fit_pulse_err(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False):
     """
     Fit pulse error decay (p[0]+p[1]*(1-p[2])^x). Uses pulse_errfunc
@@ -389,7 +377,6 @@ def fit_pulse_err(xdata, ydata, fitparams=None, domain=None, showfit=False, show
                                    showstartfit=showstartfit)
 
     return params, param_errs
-
 
 def fit_decaysin(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False, verbose=True,
                  **kwarg):
@@ -433,7 +420,6 @@ def fit_decaysin(xdata, ydata, fitparams=None, domain=None, showfit=False, shows
 
     return params, param_errs
 
-
 def fit_sin(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False, verbose=True,
             **kwarg):
     """
@@ -474,7 +460,6 @@ def fit_sin(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartf
         plot_fitresult(fitdatax, fitdatay, params, param_errs, fitparam_names=parnames)
 
     return params, param_errs
-
 
 def fit_gauss(xdata, ydata, fitparams=None, no_offset=False, domain=None, showfit=False, showstartfit=False,
               verbose=True, **kwarg):
@@ -526,7 +511,6 @@ def fit_gauss(xdata, ydata, fitparams=None, no_offset=False, domain=None, showfi
 
     return params, param_errs
 
-
 def fit_hanger(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False,
                verbose=True, **kwarg):
     """
@@ -568,7 +552,6 @@ def fit_hanger(xdata, ydata, fitparams=None, domain=None, showfit=False, showsta
 
     return params, param_errs
 
-
 def fit_parabola(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False,
                  verbose=True, **kwarg):
     """
@@ -603,7 +586,6 @@ def fit_parabola(xdata, ydata, fitparams=None, domain=None, showfit=False, shows
         plot_fitresult(fitdatax, fitdatay, params, param_errs, fitparam_names=parnames)
 
     return params, param_errs
-
 
 def fit_s11(xdata, ydata, mode='oneport', fitparams=None, domain=None, showfit=False, showstartfit=False,
             verbose=True, **kwarg):
@@ -663,7 +645,6 @@ def fit_s11(xdata, ydata, mode='oneport', fitparams=None, domain=None, showfit=F
 
     return params, param_errs
 
-
 def fit_fano(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False,
              verbose=True, **kwarg):
     """
@@ -700,7 +681,6 @@ def fit_fano(xdata, ydata, fitparams=None, domain=None, showfit=False, showstart
         plot_fitresult(fitdatax, fitdatay, params, param_errs, fitparam_names=parnames)
 
     return params, param_errs
-
 
 def fit_lor_asym(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False,
                  verbose=True, **kwarg):
@@ -740,7 +720,6 @@ def fit_lor_asym(xdata, ydata, fitparams=None, domain=None, showfit=False, shows
 
     return params, param_errs
 
-
 def fit_poly(xdata, ydata, mode=None, fitparams=None, domain=None, showfit=False, showstartfit=False,
              verbose=True, **kwarg):
     """
@@ -748,6 +727,7 @@ def fit_poly(xdata, ydata, mode=None, fitparams=None, domain=None, showfit=False
     y = p0 + p1*x + p2*x**2 + ...
     :param xdata: x-data
     :param ydata: y-data
+    :param mode: 'even' or 'odd' restricts the fitfunction to only even or odd powers.
     :param fitparams: [a0, a1, a2, a3, ...] where y = a0 + a1*x + a2*x**2 + ...
     :param domain: Tuple
     :param showfit: True/False
@@ -788,7 +768,7 @@ def fit_poly(xdata, ydata, mode=None, fitparams=None, domain=None, showfit=False
 
     return params, param_errs
 
-def fit_powerlaw(xdata, ydata, mode=None, fitparams=None, domain=None, showfit=False, showstartfit=False,
+def fit_powerlaw(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False,
                  verbose=True, **kwarg):
     """
     Fit a power law function of the form y = p[0] + p[1] * x ** p[2]
@@ -832,8 +812,8 @@ def fit_powerlaw(xdata, ydata, mode=None, fitparams=None, domain=None, showfit=F
 
 def lorfunc(x, *p):
     """
-    Lorentzian with offset, for use with fitgeneral functionality.
-    :param p: [offset, peak amplitude, center, hwhm]
+    Lorentzian with or without offset
+    :param p: [offset, peak amplitude, center, hwhm] or [peak amplitude, center, hwhm]
     :param x: Frequency points
     :return: p[0]+p[1]/(1+(x-p[2])**2/p[3]**2)
     """
@@ -841,7 +821,6 @@ def lorfunc(x, *p):
         return p[0] / (1 + (x - p[1]) ** 2 / p[2] ** 2)
     else:
         return p[0] + p[1] / (1 + (x - p[2]) ** 2 / p[3] ** 2)
-
 
 def kinfunc(x, *p):
     """
@@ -862,25 +841,23 @@ def kinfunc(x, *p):
     f0s = f0 * (1 + alpha / (1 - (x / Tc) ** 4)) ** (-1 / 2.)
     return f0s
 
-
 def twolorfunc(x, *p):
     """
+    Two lorentzian functions (magnitude)
     :param p: [offset, amplitude 1, center 1, hwhm 1, amplitude 2, center 2, hwhm 2]
     :param x: Frequency points
     :return: p[0] + p[1]/(1+(x-p[2])**2/p[3]**2) + p[4]/(1+(x-p[5])**2/p[6]**2)
     """
     return p[0] + p[1] / (1 + (x - p[2]) ** 2 / p[3] ** 2) + p[4] / (1 + (x - p[5]) ** 2 / p[6] ** 2)
 
-
 def asym_lorfunc(x, *p):
     """
-    Asymmetric Lorentzian profile derived with capacitor in parallel.
+    Asymmetric Lorentzian profile derived with a parallel capacitor that directly couples the input and output lines.
     :param x: Frequency points
     :param p: [peak amplitude, f0, fwhm, parallel capacitance]
     :return: np.abs(np.sqrt(p[0])/(1 + 1j * (x - p[1]) / p[2]) + np.sqrt(p[0]) * 2 * x * p[3] / p[1] / (+1j + 2 * x * p[3] / p[1])) ** 2
     """
     return np.abs(np.sqrt(p[0]) / (1 + 1j * 2 * (x - p[1]) / p[2]) + np.sqrt(p[0]) * 2 * x * p[3] / p[1] / (+1j + 2 * x * p[3] / p[1])) ** 2
-
 
 def fano_func(x, *p):
     """
@@ -891,7 +868,6 @@ def fano_func(x, *p):
     """
     return p[3] * (p[2] * p[1] / 2. + (x - p[0])) ** 2 / ((p[1] / 2.) ** 2 + (x - p[0]) ** 2)
 
-
 def print_cavity_Q(fit):
     """
     Prints the Q values given center and HWHM
@@ -901,7 +877,6 @@ def print_cavity_Q(fit):
     print(fit[2] / 2 / fit[3])
     return fit[2] / 2 / fit[3]
 
-
 def gaussfunc(x, *p):
     """
     Gaussian function, including an offset
@@ -910,7 +885,6 @@ def gaussfunc(x, *p):
     """
     return p[0] + p[1] * math.e ** (-1. / 2. * (x - p[2]) ** 2 / p[3] ** 2)
 
-
 def gaussfunc_nooffset(x, *p):
     """
     Gaussian function, no offset
@@ -918,7 +892,6 @@ def gaussfunc_nooffset(x, *p):
     :return: p[0]*math.e**(-1./2.*(x-p[1])**2/p[2]**2)
     """
     return p[0] * math.e ** (-1. / 2. * (x - p[1]) ** 2 / p[2] ** 2)
-
 
 def Ngaussfunc(x, *p):
     """
@@ -945,7 +918,6 @@ def Ngaussfunc_no_offset(x, *p):
         Ngauss += p[3 * n + 1] * math.e ** (-1. / 2. * (x - p[3 * n + 2]) ** 2 / p[3 * n + 3] ** 2)
     return Ngauss
 
-
 def expfunc(x, *p):
     """
     Exponential function, including an offset
@@ -954,7 +926,6 @@ def expfunc(x, *p):
     :return: p[0]+p[1]*math.e**(-x/p[2])
     """
     return p[0] + p[1] * math.e ** (-x / p[2])
-
 
 def pulse_errfunc(x, *p):
     """
@@ -965,7 +936,6 @@ def pulse_errfunc(x, *p):
     """
     return p[0] + 0.5 * (1 - ((1 - p[1]) ** x))
 
-
 def decaysin(x, *p):
     """
     Exponential decaying sine function.
@@ -975,7 +945,6 @@ def decaysin(x, *p):
     """
     return p[0] * np.sin(2. * np.pi * p[1] * x + p[2] * np.pi / 180.) * np.e ** (-1. * (x - p[5]) / p[3]) + p[4]
 
-
 def sinfunc(x, *p):
     """
     Sine function
@@ -984,7 +953,6 @@ def sinfunc(x, *p):
     :return: p[0]*np.sin(2.*np.pi*p[1]*x+p[2]*np.pi/180.)+p[3]
     """
     return p[0] * np.sin(2. * np.pi * p[1] * x + p[2] * np.pi / 180.) + p[3]
-
 
 def hangerfunc(x, *p):
     """
@@ -1000,7 +968,6 @@ def hangerfunc(x, *p):
     return scale * (-2. * Q0 * Qc + Qc ** 2. + Q0 ** 2. * (1. + Qc ** 2. * (2. * a + b) ** 2.)) / (
         Qc ** 2 * (1. + 4. * Q0 ** 2. * a ** 2.))
 
-
 def s11_mag_func(x, *p):
     """
     Symmetric S11 magnitude function (reflection from resonator) in voltage.
@@ -1011,17 +978,15 @@ def s11_mag_func(x, *p):
     return np.abs(((p[2] - p[1]) / p[2] + 2 * 1j * (x - p[0]) * p[1] / p[0]) / (
         (p[1] + p[2]) / p[2] + 2 * 1j * (x - p[0]) * p[1] / p[0]))
 
-
 def s11_phase_func(x, *p):
     """
     Symmetric S11 phase function (reflection from resonator) in radians.
     :param x: Frequency points
     :param p: [w0, Qi, Qc]
-    :return: common.get_phase(((p[2]-p[1])/p[2] + 2*1j*(x-p[0])*p[1]/p[0])/((p[1]+p[2])/p[2] + 2*1j*(x-p[0])*p[1]/p[0]))
+    :return: np.angle(((p[2]-p[1])/p[2] + 2*1j*(x-p[0])*p[1]/p[0])/((p[1]+p[2])/p[2] + 2*1j*(x-p[0])*p[1]/p[0]))
     """
-    return common.get_phase(((p[2] - p[1]) / p[2] + 2 * 1j * (x - p[0]) * p[1] / p[0]) / (
+    return np.angle(((p[2] - p[1]) / p[2] + 2 * 1j * (x - p[0]) * p[1] / p[0]) / (
         (p[1] + p[2]) / p[2] + 2 * 1j * (x - p[0]) * p[1] / p[0]))
-
 
 def s11_mag_func_asymmetric(x, *p):
     """
@@ -1032,16 +997,14 @@ def s11_mag_func_asymmetric(x, *p):
     """
     return p[4] * np.abs((1j * (x - p[0]) + (p[2] - p[1] / 2.)) / (1j * (x - p[0]) + 1j * p[3] + (p[2] + p[1] / 2.)))
 
-
 def s11_phase_func_asymmetric(x, *p):
     """
     Asymmetric S11 phase function (reflection from 1 port resonator)
     :param x: Frequency points
     :param p: [f0, kr, eps, df, scale]
-    :return: common.get_phase((1j*(x-p[0]) + (p[2]-p[1]/2.))/(1j*(x-p[0]) + 1j*p[3] + (p[2]+p[1]/2.)))
+    :return: np.angle((1j*(x-p[0]) + (p[2]-p[1]/2.))/(1j*(x-p[0]) + 1j*p[3] + (p[2]+p[1]/2.)))
     """
-    return common.get_phase((1j * (x - p[0]) + (p[2] - p[1] / 2.)) / (1j * (x - p[0]) + 1j * p[3] + (p[2] + p[1] / 2.)))
-
+    return np.angle((1j * (x - p[0]) + (p[2] - p[1] / 2.)) / (1j * (x - p[0]) + 1j * p[3] + (p[2] + p[1] / 2.)))
 
 def s11_mag_twoport(x, *p):
     """
@@ -1057,21 +1020,19 @@ def s11_mag_twoport(x, *p):
     ki = df
     return scale * np.abs((-1j * dw + 1j * ki - eps) / (1j * dw + kr + eps))
 
-
 def s11_phase_twoport(x, *p):
     """
     Reflection off a 2 port resonator
     :param x: fpoints
     :param p:  [f0, Qc, Qi, df, scale]
-    :return: common.get_phase((-1j*dw + 1j*ki - eps)/(1j*dw + kr + eps))
+    :return: np.angle((-1j*dw + 1j*ki - eps)/(1j*dw + kr + eps))
     """
     f0, Qc, Qi, df, scale = p
     dw = x - f0
     kr = f0 / Qc
     eps = f0 / Qi
     ki = df
-    return common.get_phase((-1j * dw + 1j * ki - eps) / (1j * dw + kr + eps))
-
+    return np.angle((-1j * dw + 1j * ki - eps) / (1j * dw + kr + eps))
 
 def parabolafunc(x, *p):
     """
@@ -1081,7 +1042,6 @@ def parabolafunc(x, *p):
     :return: p[0] + p[1]*(x-p[2])**2
     """
     return p[0] + p[1] * (x - p[2]) ** 2
-
 
 def polyfunc(x, *p):
     """
@@ -1095,7 +1055,6 @@ def polyfunc(x, *p):
         y += P * x ** n
     return y
 
-
 def polyfunc_even(x, *p):
     """
     Even polynomial of arbitrary order. Order is specified by the length of p
@@ -1108,7 +1067,6 @@ def polyfunc_even(x, *p):
         y += P * x ** (2*n)
     return y
 
-
 def polyfunc_odd(x, *p):
     """
     Odd polynomial of arbitrary order. Order is specified by the length of p
@@ -1120,7 +1078,6 @@ def polyfunc_odd(x, *p):
     for n, P in enumerate(p[1:]):
         y += P * x ** (2*n+1)
     return y
-
 
 def powerlawfunc(x, *p):
     """
