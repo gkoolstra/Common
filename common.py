@@ -425,6 +425,49 @@ def plot_spectrum(y, t, ret=True, do_plot=True, freqlim='auto', ylim='auto', log
             else:
                 return frq, np.abs(Y)**2
 
+def filter_in_time(time_axis, voltage_axis, filter_type='RC_double_low_pass', do_plot=False, **kwargs):
+    """
+    Calculates the response of a voltage wave form sent through a filter. The filter type can be specified by
+    filter_type.
+    :param time_axis: numpy array that defines the x-axis
+    :param voltage_axis: wave form must have the same length as time_axis
+    :param filter_type: one of 'RC_low_pass', 'RC_double_low_pass', 'RC_high_pass'
+    :param do_plot: plot the resulting filtered waveform
+    :param kwargs: Arguments passed on to the filter function such as R, C (RC_low_pass/RC_high_pass) or
+    R1, C1, R2, C2 (RC_double_low_pass)
+    :return:
+    """
+
+    if filter_type == 'RC_low_pass':
+        def filter_function(f, **kwargs):
+            omega = 2 * np.pi * f
+            return 1 / (1 + 1j * omega * R * C)
+
+    elif filter_type == 'RC_double_low_pass':
+        def filter_function(f, **kwargs):
+            omega = 2 * np.pi * f
+            return 1 / (1 + 1j * omega * (R1 * C1 + R2 * C2) + omega **2 * (R1 * C1 * R2 * C2))
+
+    elif filter_type == 'RC_high_pass':
+        def filter_function(f, **kwargs):
+            omega = 2 * np.pi * f
+            return 1 / (1 + 1 / (1j * omega * R * C))
+
+    # We use plot_spectrum to calculate the frequency points
+    f, Y = plot_spectrum(voltage_axis, time_axis, verbose=False, ret=True, do_plot=False)
+
+    Vfft = np.fft.fft(voltage_axis) # FFT of the input signal
+    Ffft = np.zeros(len(Vfft)) # FFT of the RC filter must have the same form as the output of np.fft.fft
+    Ffft[:len(Vfft) // 2] = filter_function(f, **kwargs)
+    Ffft[len(Vfft) // 2 + 1:] = filter_function(f, **kwargs)[1:][::-1]
+
+    if do_plot:
+        plt.plot(time_axis, np.fft.ifft(Vfft), label='untouched')
+        plt.plot(time_axis, np.fft.ifft(Vfft * Ffft), label='filtered')
+
+    return np.fft.ifft(Vfft * Ffft)
+
+
 def split_power(power_in, conversion_loss):
     """
     Calculates the power at the output of a power splitter.
@@ -461,27 +504,6 @@ def CfromQ(L, C, Qext):
     print("Resonance frequency = f0 = %.3e Hz"%(w0/(2*np.pi)))
     print("Impedance = Z = %.3e Ohms"%Z)
     return 1/np.sqrt(2*Qext*Z0*w0**3*L)
-
-def beep():
-    """
-    Notifies the user of a certain event by playing a sound sequence.
-    This sound sequence is a C E G C chord. :)
-    :return: None
-    """
-    for k in range(4):
-        winsound.Beep(261, 250)
-        winsound.Beep(330, 250)
-        winsound.Beep(392, 250)
-        winsound.Beep(523, 250)
-
-        winsound.PlaySound('SystemAsterisk', winsound.SND_ALIAS)
-
-def simple_beep():
-    """
-    Play a simple windows sound.
-    :return: None
-    """
-    winsound.PlaySound('SystemAsterisk', winsound.SND_ALIAS)
 
 def q_finder(magnitudes, fpoints, debug=False, start_idx=None):
     """
