@@ -441,23 +441,31 @@ def filter_in_time(time_axis, voltage_axis, filter_type='RC_double_low_pass', do
     if filter_type == 'RC_low_pass':
         def filter_function(f, **kwargs):
             omega = 2 * np.pi * f
+            R = kwargs['R']
+            C = kwargs['C']
             return 1 / (1 + 1j * omega * R * C)
 
     elif filter_type == 'RC_double_low_pass':
         def filter_function(f, **kwargs):
             omega = 2 * np.pi * f
+            R1 = kwargs['R1']
+            R2 = kwargs['R2']
+            C1 = kwargs['C1']
+            C2 = kwargs['C2']
             return 1 / (1 + 1j * omega * (R1 * C1 + R2 * C2) + omega **2 * (R1 * C1 * R2 * C2))
 
     elif filter_type == 'RC_high_pass':
         def filter_function(f, **kwargs):
             omega = 2 * np.pi * f
+            R = kwargs['R']
+            C = kwargs['C']
             return 1 / (1 + 1 / (1j * omega * R * C))
 
     # We use plot_spectrum to calculate the frequency points
     f, Y = plot_spectrum(voltage_axis, time_axis, verbose=False, ret=True, do_plot=False)
 
     Vfft = np.fft.fft(voltage_axis) # FFT of the input signal
-    Ffft = np.zeros(len(Vfft)) # FFT of the RC filter must have the same form as the output of np.fft.fft
+    Ffft = np.zeros(len(Vfft), dtype=np.complex128) # FFT of the RC filter must have the same form as the output of np.fft.fft
     Ffft[:len(Vfft) // 2] = filter_function(f, **kwargs)
     Ffft[len(Vfft) // 2 + 1:] = filter_function(f, **kwargs)[1:][::-1]
 
