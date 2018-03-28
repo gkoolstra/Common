@@ -462,8 +462,13 @@ def filter_in_time(time_axis, voltage_axis, filter_type='RC_double_low_pass', do
             C = kwargs['C']
             return 1 / (1 + 1 / (1j * omega * R * C))
 
+    # Data must be even in length, otherwise it'll lead to problems.
+    if (len(time_axis) % 2):
+        time_axis = time_axis[:-1]
+        voltage_axis = voltage_axis[:-1]
+
     # We use plot_spectrum to calculate the frequency points
-    f, Y = plot_spectrum(voltage_axis, time_axis, verbose=False, ret=True, do_plot=False)
+    f, Y = plot_spectrum(voltage_axis, time_axis, verbose=False, ret=True, do_plot=False)\
 
     Vfft = np.fft.fft(voltage_axis) # FFT of the input signal
     Ffft = np.zeros(len(Vfft), dtype=np.complex128) # FFT of the RC filter must have the same form as the output of np.fft.fft
@@ -474,7 +479,7 @@ def filter_in_time(time_axis, voltage_axis, filter_type='RC_double_low_pass', do
         plt.plot(time_axis, np.fft.ifft(Vfft), label='untouched')
         plt.plot(time_axis, np.fft.ifft(Vfft * Ffft), label='filtered')
 
-    return np.fft.ifft(Vfft * Ffft)
+    return time_axis, np.fft.ifft(Vfft * Ffft)
 
 
 def split_power(power_in, conversion_loss):
