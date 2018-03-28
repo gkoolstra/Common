@@ -302,7 +302,7 @@ def plot_opt(color, style='transparent', msize=8):
     else:
         return {'marker': 'o', 'ms':6, 'mew':2, 'mec': color ,'mfc': 'white'}
 
-def setup_twinax(color1='black', color2='black'):
+def setup_twinax(color1='black', color2='black', ax=None):
     """
     Sets up a double axes plot (two y-axes, one x-axis). It also colors the axes according
     to color1 (left) and color2 (right). Returns the left and right axes.
@@ -310,7 +310,8 @@ def setup_twinax(color1='black', color2='black'):
     :param color2: String denoting the color of the right axis
     :return: 2 axis handles
     """
-    ax = plt.gca()
+    if ax is None:
+        ax = plt.gca()
     ax2 = ax.twinx()
 
     ax2.tick_params(axis='y', colors=color2)
