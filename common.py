@@ -16,7 +16,7 @@ def rgb(i, N, cmap=plt.cm.plasma):
     cmap = matplotlib.cm.get_cmap(cmap)
     return cmap(i/float(N))
 
-def load_csv(filename, header_length=7, footer_length=2, ncols=3):
+def load_csv(filename, header_length=7, footer_length=2, ncols=3, complex_data=False):
     """
     Load a csv file into a numpy array.
     :param datafile: filename of the .csv file
@@ -37,13 +37,17 @@ def load_csv(filename, header_length=7, footer_length=2, ncols=3):
 
         for idx,row in enumerate(reader):
             if idx == 0:
-                data = np.zeros([len_data, ncols])
-
+                dtype = np.complex if complex_data else np.float
+                data = np.zeros([len_data, ncols], dtype=dtype)
             try:
                 for k in range(ncols):
-                    data[idx,k] = float(row[k])
+                    if complex_data:
+                        a, b = row[k].strip().strip('(').strip(')').split('+')
+                        data[idx, k] = np.complex(a) + np.complex(b)
+                    else:
+                        data[idx, k] = float(row[k])
             except:
-                pass
+                raise(ValueError("Unexpected data format. Error in parsing string!"))
 
     return data
 
