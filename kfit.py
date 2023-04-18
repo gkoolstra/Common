@@ -141,20 +141,17 @@ def fit_complex_s21(xdata, ydata, fitparams=None, domain=None, showfit=False, sh
     params, param_errs = fitbetter(fitdatax, fitdatay, complex_s21_func, fitparams, domain=None, showfit=showfit,
                                    showstartfit=showstartfit, **kwarg)
     
-    if verbose:
-        parnames = ['a', f'{chr(966)}', 'f0', chr(954)]
+    parnames = ['a', f'{chr(966)}', 'f0', chr(954)]
 
-        dataframe = pd.DataFrame(np.r_[[params], [param_errs]], columns=parnames, index=["value", "std"])
-        
-        
-        dataframe = dataframe.style.set_caption(f'Fit results for y = -a exp(i {chr(966)}) {chr(954)} / ({chr(954)} + i(f-f0))')
+    dataframe = pd.DataFrame(np.r_[[params], [param_errs]], columns=parnames, index=["value", "std"])
+    dataframe = dataframe.style.set_caption(f'Fit results for y = -a exp(i {chr(966)}) {chr(954)} / ({chr(954)} + i(f-f0))')
 
+    if showfit:
         plot_fitresult(fitdatax, fitdatay, params, param_errs, fitparam_names=parnames)
 
     return dataframe
 
-def fit_lor(xdata, ydata, fitparams=None, no_offset=False, domain=None, showfit=False, showstartfit=False,
-            verbose=True, **kwarg):
+def fit_lor(xdata, ydata, fitparams=None, no_offset=False, domain=None, showfit=False, showstartfit=False, **kwarg):
     """
     Fit a Lorentzian; returns
     The quality factor can be found by Q = center/fwhm = center/(2*hwhm)
@@ -204,24 +201,23 @@ def fit_lor(xdata, ydata, fitparams=None, no_offset=False, domain=None, showfit=
     params, param_errs = fitbetter(fitdatax, fitdatay, lorfunc, fitparams, domain=None, showfit=showfit,
                                    showstartfit=showstartfit, jac=lorfunc_jac, **kwarg)
 
-    if verbose:
-        parnames = ['Offset', 'Amplitude', 'f0', 'HWHM']
-        if no_offset:
-            parnames.pop(0)
+    parnames = ['Offset', 'Amplitude', 'f0', 'HWHM']
+    if no_offset:
+        parnames.pop(0)
 
-        dataframe = pd.DataFrame(np.r_[[params], [param_errs]], columns=parnames, index=["value", "std"])
-        
-        if no_offset:
-            dataframe = dataframe.style.set_caption(f'Fit results for y = Amplitude / (1 + (f - f0)²/HWHM²)')
-        else:
-            dataframe = dataframe.style.set_caption(f'Fit results for y = Offset + Amplitude / (1 + (f - f0)²/HWHM²)')
+    dataframe = pd.DataFrame(np.r_[[params], [param_errs]], columns=parnames, index=["value", "std"])
+    
+    if no_offset:
+        dataframe = dataframe.style.set_caption(f'Fit results for y = Amplitude / (1 + (f - f0)²/HWHM²)')
+    else:
+        dataframe = dataframe.style.set_caption(f'Fit results for y = Offset + Amplitude / (1 + (f - f0)²/HWHM²)')
 
+    if showfit:
         plot_fitresult(fitdatax, fitdatay, params, param_errs, fitparam_names=parnames)
 
     return dataframe
 
-def fit_kinetic_fraction(xdata, ydata, fitparams=None, Tc_fixed=False, domain=None, showfit=False, showstartfit=False,
-                         verbose=True, **kwarg):
+def fit_kinetic_fraction(xdata, ydata, fitparams=None, Tc_fixed=False, domain=None, showfit=False, showstartfit=False, **kwarg):
     """
     Fits resonance frequencies (absolute, not shifts) vs. temperature due to kinetic inductance. Uses kinfunc
     Returns [f0, alpha, Tc]
@@ -260,19 +256,19 @@ def fit_kinetic_fraction(xdata, ydata, fitparams=None, Tc_fixed=False, domain=No
     params, param_errs = fitbetter(fitdatax, fitdatay, kinfunc, fitparams, domain=None, showfit=showfit,
                                    showstartfit=showstartfit, jac=kinfunc_jac, **kwarg)
 
-    if verbose:
-        parnames = ['f0', 'Kinetic Inductance fraction', 'Tc']
-        print(tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
-                       tablefmt="fancy_grid", floatfmt="", numalign="center", stralign='left'))
-        
-        dataframe = pd.DataFrame(np.r_[[params], [param_errs]], columns=parnames, index=["value", "std"])
+    parnames = ['f0', 'Kinetic Inductance fraction', 'Tc']
+    print(tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
+                    tablefmt="fancy_grid", floatfmt="", numalign="center", stralign='left'))
+    
+    dataframe = pd.DataFrame(np.r_[[params], [param_errs]], columns=parnames, index=["value", "std"])
 
+    if showfit:
         plot_fitresult(fitdatax, fitdatay, params, param_errs, fitparam_names=parnames)
 
     return dataframe
 
 def fit_double_lor(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False,
-                   verbose=True, **kwarg):
+                   **kwarg):
     """
     Fits two lorentzians. Uses twolorfunc. Convert to Q: center1/2*hwhm1, center2/2*hwhm2
     :param xdata: Frequency
@@ -297,17 +293,17 @@ def fit_double_lor(xdata, ydata, fitparams=None, domain=None, showfit=False, sho
     params, param_errs = fitbetter(fitdatax, fitdatay, twolorfunc, fitparams, domain=None, showfit=showfit,
                                    showstartfit=showstartfit)
 
-    if verbose:
-        parnames = ['Offset', 'A1', 'f1', 'HWHM1', 'A2', 'f2', 'HWHM2']
-        print(tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
-                       tablefmt="fancy_grid", floatfmt="", numalign="center", stralign='left'))
+    parnames = ['Offset', 'A1', 'f1', 'HWHM1', 'A2', 'f2', 'HWHM2']
+    print(tabulate(zip(parnames, params, param_errs), headers=["Parameter", "Value", "Std"],
+                    tablefmt="fancy_grid", floatfmt="", numalign="center", stralign='left'))
 
+    if showfit:
         plot_fitresult(fitdatax, fitdatay, params, param_errs, fitparam_names=parnames)
 
     return params, param_errs
 
 def fit_N_gauss(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False,
-                verbose=True, no_offset=False, **kwarg):
+                no_offset=False, **kwarg):
     """
     Fits a series of N Gaussian peaks or dips.
     If no_offset = True : Uses Ngaussfunc_no_offset
@@ -339,18 +335,18 @@ def fit_N_gauss(xdata, ydata, fitparams=None, domain=None, showfit=False, showst
         params, param_errs = fitbetter(fitdatax, fitdatay, Ngaussfunc, fitparams, domain=None, showfit=showfit,
                                        showstartfit=showstartfit, **kwarg)
 
-    if verbose:
-        idx = 0
-        for par, err in zip(params, param_errs):
-            print("Parameter {} : {} +/- {}".format(idx, par, err))
-            idx += 1
 
+    idx = 0
+    for par, err in zip(params, param_errs):
+        print("Parameter {} : {} +/- {}".format(idx, par, err))
+        idx += 1
+
+    if showfit:
         plot_fitresult(fitdatax, fitdatay, params, param_errs, fitparam_names=None)
 
     return params, param_errs
 
-def fit_exp(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False,
-            verbose=True, **kwarg):
+def fit_exp(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False, **kwarg):
     """
     Fit exponential decay of the form (p[0]+p[1]*exp(-x/p[2])). Uses expfunc.
     :param xdata: x-data
@@ -380,11 +376,11 @@ def fit_exp(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartf
     params, param_errs = fitbetter(fitdatax, fitdatay, expfunc, fitparams, domain=None, showfit=showfit,
                                    showstartfit=showstartfit, **kwarg)#, Dfun=jacobian, col_deriv=1)
 
-    if verbose:
-        parnames = ['Offset', 'Amplitude', chr(964)]
-        dataframe = pd.DataFrame(np.r_[[params], [param_errs]], columns=parnames, index=["value", "std"])
-        dataframe = dataframe.style.set_caption(f'Fit results for y = Offset + Amplitude exp(-x/{chr(964)})')
+    parnames = ['Offset', 'Amplitude', chr(964)]
+    dataframe = pd.DataFrame(np.r_[[params], [param_errs]], columns=parnames, index=["value", "std"])
+    dataframe = dataframe.style.set_caption(f'Fit results for y = Offset + Amplitude exp(-x/{chr(964)})')
 
+    if showfit:
         plot_fitresult(fitdatax, fitdatay, params, param_errs, fitparam_names=parnames)
 
     return dataframe
@@ -452,14 +448,14 @@ def fit_decaysin(xdata, ydata, fitparams=None, domain=None, showfit=False, shows
     params, param_errs = fitbetter(fitdatax, fitdatay, decaysin, fitparams, domain=None, showfit=showfit,
                                    showstartfit=showstartfit, **kwarg)
 
-    if verbose:
-        parnames = ['A', 'f', chr(966), chr(964), 'Offset']
-        
-        dataframe = pd.DataFrame(np.r_[[params], [param_errs]], columns=parnames, index=["value", "std"])
-        dataframe = dataframe.style.set_caption(f'Fit results for y = Offset + A sin(2πf x + {chr(966)}) exp(-x/{chr(964)})')
+    parnames = ['A', 'f', chr(966), chr(964), 'Offset']
+    dataframe = pd.DataFrame(np.r_[[params], [param_errs]], columns=parnames, index=["value", "std"])
+    dataframe = dataframe.style.set_caption(f'Fit results for y = Offset + A sin(2πf x + {chr(966)}) exp(-x/{chr(964)})')
+    
+    if showfit:
         plot_fitresult(fitdatax, fitdatay, params, param_errs, fitparam_names=parnames)
 
-    return dataframe #params, param_errs
+    return dataframe
 
 def fit_sin(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False, verbose=True,
             **kwarg):
@@ -495,18 +491,17 @@ def fit_sin(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartf
     params, param_errs = fitbetter(fitdatax, fitdatay, sinfunc, fitparams, domain=None, showfit=showfit,
                                    showstartfit=showstartfit, **kwarg)
 
-    if verbose:
-        parnames = ['A', 'f', chr(966), 'Offset']
+    parnames = ['A', 'f', chr(966), 'Offset']
 
-        dataframe = pd.DataFrame(np.r_[[params], [param_errs]], columns=parnames, index=["value", "std"])
-        dataframe = dataframe.style.set_caption(f'Fit results for y = Offset + A sin(2πf x + {chr(966)})')
-        
+    dataframe = pd.DataFrame(np.r_[[params], [param_errs]], columns=parnames, index=["value", "std"])
+    dataframe = dataframe.style.set_caption(f'Fit results for y = Offset + A sin(2πf x + {chr(966)})')
+    
+    if showfit:        
         plot_fitresult(fitdatax, fitdatay, params, param_errs, fitparam_names=parnames)
 
     return dataframe
 
-def fit_gauss(xdata, ydata, fitparams=None, no_offset=False, domain=None, showfit=False, showstartfit=False,
-              verbose=True, **kwarg):
+def fit_gauss(xdata, ydata, fitparams=None, no_offset=False, domain=None, showfit=False, showstartfit=False, **kwarg):
     """
     Fit a gaussian. You can choose to include an offset, using no_offset=True/False. Adjust fitparams accordingly:
     no_offset = True:   p[1] exp(- (x-p[2])**2/p[3]**2/2) (uses gaussfunc_nooffset)
@@ -543,22 +538,22 @@ def fit_gauss(xdata, ydata, fitparams=None, no_offset=False, domain=None, showfi
     params, param_errs = fitbetter(fitdatax, fitdatay, fitfunc, fitparams, domain=None, showfit=showfit,
                                    showstartfit=showstartfit, **kwarg)
 
-    if verbose:
-        if no_offset:
-            parnames = ['Amplitude', chr(956), chr(963)]
-            dataframe = pd.DataFrame(np.r_[[params], [param_errs]], columns=parnames, index=["value", "std"])
-            dataframe = dataframe.style.set_caption(f'Fit results for y = exp(-(x-{chr(956)})²/(2{chr(963)})²)')
-        else:
-            parnames = ['Offset', 'Amplitude', chr(956), chr(963)]
-            dataframe = pd.DataFrame(np.r_[[params], [param_errs]], columns=parnames, index=["value", "std"])
-            dataframe = dataframe.style.set_caption(f'Fit results for y = Offset + exp(-(x-{chr(956)})²/(2{chr(963)})²)')
+    if no_offset:
+        parnames = ['Amplitude', chr(956), chr(963)]
+        dataframe = pd.DataFrame(np.r_[[params], [param_errs]], columns=parnames, index=["value", "std"])
+        dataframe = dataframe.style.set_caption(f'Fit results for y = exp(-(x-{chr(956)})²/(2{chr(963)})²)')
+    else:
+        parnames = ['Offset', 'Amplitude', chr(956), chr(963)]
+        dataframe = pd.DataFrame(np.r_[[params], [param_errs]], columns=parnames, index=["value", "std"])
+        dataframe = dataframe.style.set_caption(f'Fit results for y = Offset + exp(-(x-{chr(956)})²/(2{chr(963)})²)')
 
+    if showfit:
         plot_fitresult(fitdatax, fitdatay, params, param_errs, fitparam_names=parnames)
 
     return dataframe
 
 def fit_hanger(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False,
-               verbose=True, **kwarg):
+               **kwarg):
     """
     Fit Hanger Transmission (S21) data taking into account asymmetry. Uses hangerfunc.
     :param xdata: Frequency points
@@ -590,16 +585,17 @@ def fit_hanger(xdata, ydata, fitparams=None, domain=None, showfit=False, showsta
     params, param_errs = fitbetter(fitdatax, fitdatay, hangerfunc, fitparams, domain=domain, showfit=showfit,
                                    showstartfit=showstartfit, **kwarg)
 
-    if verbose:
-        parnames = ['f0', 'Qi', 'Qc', 'df', 'scale']
-        dataframe = pd.DataFrame(np.r_[[params], [param_errs]], columns=parnames, index=["value", "std"])
+    parnames = ['f0', 'Qi', 'Qc', 'df', 'scale']
+    dataframe = pd.DataFrame(np.r_[[params], [param_errs]], columns=parnames, index=["value", "std"])
+    
+    if showfit:
         plot_fitresult(fitdatax, fitdatay, params, param_errs, fitparam_names=parnames)
-        dataframe = dataframe.style.set_caption(f'Fit results for asymmetric hanger function')
+    dataframe = dataframe.style.set_caption(f'Fit results for asymmetric hanger function')
 
     return dataframe
 
 def fit_parabola(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False,
-                 verbose=True, **kwarg):
+                 **kwarg):
     """
     Fit a parabola. Uses parabolafunc. Specify fitparams as [p0, p1, p2] where y = p0 + p1*(x-p2)**2
     :param xdata: x-data
@@ -625,9 +621,10 @@ def fit_parabola(xdata, ydata, fitparams=None, domain=None, showfit=False, shows
     params, param_errs = fitbetter(fitdatax, fitdatay, parabolafunc, fitparams, domain=None, showfit=showfit,
                                    showstartfit=showstartfit, **kwarg)
 
-    if verbose:
-        parnames = ["a%d" % idx for idx in range(len(params))]
-        dataframe = pd.DataFrame(np.r_[[params], [param_errs]], columns=parnames, index=["value", "std"])
+    parnames = ["a%d" % idx for idx in range(len(params))]
+    dataframe = pd.DataFrame(np.r_[[params], [param_errs]], columns=parnames, index=["value", "std"])
+    dataframe = dataframe.style.set_caption(f'Fit results for y = a0 + a1 (x - a2)²')
+    if showfit:
         plot_fitresult(fitdatax, fitdatay, params, param_errs, fitparam_names=parnames)
 
     return dataframe
@@ -683,8 +680,8 @@ def fit_s11(xdata, ydata, mode='oneport', fitparams=None, domain=None, showfit=F
                                        showstartfit=showstartfit, **kwarg)
         names = ['f0', 'Qc', 'Qi', 'df', 'scale']
 
-    if verbose:
-        dataframe = pd.DataFrame(np.r_[[params], [param_errs]], columns=names, index=["value", "std"])
+    dataframe = pd.DataFrame(np.r_[[params], [param_errs]], columns=names, index=["value", "std"])
+    if showfit:
         plot_fitresult(fitdatax, fitdatay, params, param_errs, fitparam_names=names)
 
     return dataframe
@@ -758,13 +755,14 @@ def fit_lor_asym(xdata, ydata, fitparams=None, domain=None, showfit=False, shows
 
     if verbose:
         parnames = ['Amplitude', 'f0', 'FWHM', 'Parallel capacitance']
-        dataframe = pd.DataFrame(np.r_[[params], [param_errs]], columns=parnames, index=["value", "std"])
+    
+    dataframe = pd.DataFrame(np.r_[[params], [param_errs]], columns=parnames, index=["value", "std"])
+    if showfit:
         plot_fitresult(fitdatax, fitdatay, params, param_errs, fitparam_names=parnames)
 
     return dataframe
 
-def fit_poly(xdata, ydata, mode=None, fitparams=None, domain=None, showfit=False, showstartfit=False,
-             verbose=True, **kwarg):
+def fit_poly(xdata, ydata, mode=None, fitparams=None, domain=None, showfit=False, showstartfit=False, **kwarg):
     """
     Fit a polynomial. Uses polyfunc. Specify fitparams as [p0, p1, p2, ...] where
     y = p0 + p1*x + p2*x**2 + ...
@@ -791,21 +789,22 @@ def fit_poly(xdata, ydata, mode=None, fitparams=None, domain=None, showfit=False
 
     if mode == 'even':
         fitfunction = polyfunc_even
-        fitfunc_string = "Fit function: y = a0 + a1*x**2 + a2*x**4 + ..."
+        fitfunc_string = "y = a0 + a1*x**2 + a2*x**4 + ..."
     elif mode == 'odd':
         fitfunction = polyfunc_odd
-        fitfunc_string = "Fit function: y = a0 + a1*x + ..."
+        fitfunc_string = "y = a0 + a1*x + ..."
     else:
         fitfunction = polyfunc
-        fitfunc_string = "Fit function: y = a0 + a1*x + a2*x**3 + ..."
+        fitfunc_string = "y = a0 + a1*x + a2*x**3 + ..."
 
     params, param_errs = fitbetter(fitdatax, fitdatay, fitfunction, fitparams, domain=None, showfit=showfit,
                                    showstartfit=showstartfit, **kwarg)
-
-    if verbose:
-        print(fitfunc_string)
-        parnames = ["a%d" % idx for idx in range(len(params))]
-        dataframe = pd.DataFrame(np.r_[[params], [param_errs]], columns=parnames, index=["value", "std"])
+        
+    parnames = ["a%d" % idx for idx in range(len(params))]
+    dataframe = pd.DataFrame(np.r_[[params], [param_errs]], columns=parnames, index=["value", "std"])
+    dataframe = dataframe.style.set_caption(f'Fit results for {fitfunc_string}')
+    
+    if showfit:
         plot_fitresult(fitdatax, fitdatay, params, param_errs, fitparam_names=parnames)
 
     return dataframe
