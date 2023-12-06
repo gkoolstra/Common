@@ -60,6 +60,73 @@ def plot_fitresult(xdata, ydata, bestfitparams, fitparam_errors, fitparam_names=
 
     plt.legend(loc=0, frameon=False, prop={'size': 8}, title="Fit result")
     plt.ylim(ylims)
+    
+def plot_complex_fitresult(xdata, ydata, fitfunc, fitresult, mode='complex_plane', fitparam_names=None):
+    """Plots the fit result for a complex fit function according to 'mode'.
+
+    Args:
+        xdata (array): xdata, usually frequency points in array format
+        ydata (array): complex array of the same length as ydata.
+        fitfunc (function): Fit function with arguments x, *p, such as one defined in this file.
+        fitresult (Pandas DataFrame type): Pandas dataframe without the header.
+        mode (str, optional): Plotting mode, may be one of 'complex_plane' or 'mag_phase'. Defaults to 'complex_plane'.
+        fitparam_names (List, optional): List of names of the fit parameters. Defaults to None.
+    """
+
+    # In this case ydata has two rows, real and imaginary
+    bestfitparams = fitresult.values[0]
+    fitparam_errors = fitresult.values[1]
+    
+    real_fit, imag_fit = fitfunc(xdata, *fitresult.values[0]).reshape((2, -1))
+    
+    if mode == 'complex_plane':
+        plt.plot(np.real(ydata), np.imag(ydata))
+        plt.plot(real_fit, imag_fit, '-k')
+        plt.xlabel("Real")
+        plt.ylabel("Imaginary")
+
+        plt.gca().set_aspect('equal')
+        
+    elif mode == 'mag_phase':
+        fitted_log_mag = 20 * np.log10(real_fit + 1j * imag_fit)
+        fitted_phase = np.arctan2(imag_fit, real_fit) * 180 / np.pi # units: degrees
+        
+        data_log_mag = 20 * np.log10(np.abs(ydata))
+        data_phase = np.arctan2(np.imag(ydata), np.real(ydata)) * 180 / np.pi # units: degrees
+
+        fig, [ax0, ax1] = plt.subplots(1, 2, figsize=(8, 3.5))
+        
+        ax0.plot(xdata, data_log_mag)
+        ax0.plot(xdata, fitted_log_mag, '-k')
+        ax0.set_xlabel("Frequency (Hz)")
+        ax0.set_ylabel("Magnitude (dB)")
+        ax0.set_xlim(np.min(xdata), np.max(xdata))
+
+        ax1.plot(xdata, data_phase)
+        ax1.plot(xdata, fitted_phase, '-k')
+        ax1.set_xlabel("Frequency (Hz)")
+        ax1.set_ylabel("Phase (deg)")
+        ax1.set_xlim(np.min(xdata), np.max(xdata))
+        
+        fig.tight_layout()
+        
+    else:
+        print('Plot mode is not recognized.')
+    
+    if fitparam_names is None:
+        fitparam_names = ["par%d" % k for k in range(len(bestfitparams))]
+
+    # Remember the limits of the y-axis so that we don't change it
+    ylims = plt.ylim()
+    xlims = plt.xlim()
+    for k in range(len(bestfitparams)):
+        plt.plot(xdata[k], ydata[k],
+                label=r"%s = %.2e $\pm$ %.2e" % (fitparam_names[k], bestfitparams[k], fitparam_errors[k]), alpha=0)
+
+    plt.legend(loc=0, frameon=False, prop={'size': 8}, title="Fit result")
+    plt.ylim(ylims)
+    plt.xlim(xlims)
+    
 
 def fitbetter(xdata, ydata, fitfunc, fitparams, parambounds=None, domain=None, showfit=False, showstartfit=False,
               showdata=False, mark_data='ko', mark_fit='r-', **kwargs):
@@ -150,6 +217,42 @@ def fit_complex_s21(xdata, ydata, fitparams=None, domain=None, showfit=False, sh
         plot_fitresult(fitdatax, fitdatay, params, param_errs, fitparam_names=parnames)
 
     return dataframe
+
+def fit_complex_s11(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False, plot_mode='complex_plane', 
+                    verbose=True, **kwarg):
+    
+    # ydata is a complex array, xdata contains the frequency axis
+    if domain is not None:
+        fitdatax, fitdatay = selectdomain(xdata, ydata, domain)
+    else:
+        fitdatax = xdata
+        fitdatay = ydata
+    if fitparams is None:
+        fitparams = [0, 0, 0, 0, 0, 0] # [f0, Qc, Qi, df, scale, phase_offset]
+        linewidth_guess = (max(fitdatax) - min(fitdatax)) / 10.
+        fitparams[0] = fitdatax[np.argmin(np.abs(fitdatay))]
+        fitparams[1] = fitparams[0] / linewidth_guess
+        fitparams[2] = fitparams[0] / linewidth_guess
+        fitparams[4] = np.max(np.abs(fitdatay))
+        fitparams[5] = np.mean(np.arctan2(np.imag(fitdatay), np.real(fitdatay)) * 180 / np.pi)
+        
+    fitdatay = np.r_[np.real(fitdatay), np.imag(fitdatay)].flatten()
+
+    params, param_errs = fitbetter(fitdatax, fitdatay, complex_s11_func, fitparams, domain=None, showfit=False,
+                                   showstartfit=showstartfit, **kwarg)
+    
+    parnames = ['f0', 'Qc', 'Qi', 'df', 'scale', 'phase_offset']
+
+    dataframe = pd.DataFrame(np.r_[[params], [param_errs]], columns=parnames, index=["value", "std"])
+    dataframe = dataframe.style.set_caption(f'Fit results for complex asymmetric reflection profile')
+
+    if showfit:
+        # plot_fitresult(fitdatax, fitdatay, params, param_errs, fitparam_names=parnames)
+        realdatay, imagdatay = fitdatay.reshape((2, -1))
+        plot_complex_fitresult(fitdatax, realdatay + 1j * imagdatay, complex_s11_func, dataframe.data, mode=plot_mode, fitparam_names=parnames)
+
+    return dataframe
+
 
 def fit_lor(xdata, ydata, fitparams=None, no_offset=False, domain=None, showfit=False, showstartfit=False, **kwarg):
     """
@@ -1021,6 +1124,21 @@ def s11_mag_func(x, *p):
     
 def complex_s21_func(x, *p):
     complex_amp = p[0] * p[3] / (-1j * (x - p[2]) -  p[3]) * np.exp(1j * p[1])
+    return np.r_[np.real(complex_amp), np.imag(complex_amp)].flatten()
+
+def complex_s11_func(x, *p):
+    """
+    Asymmetric S11 magnitude function (reflection from 1 port resonator), in voltage!
+    :param x: Frequency points
+    :param p: [f0, Qc, Qi, df, scale, phase_offset]
+    :return: p[4]*np.abs((1j*(x-p[0]) + (p[2]-p[1]/2.))/(1j*(x-p[0]) + 1j*p[3] + (p[2]+p[1]/2.)))
+    """
+    f0 = p[0]
+    eps = f0 / (2 * p[1])
+    kr = f0 / p[2]
+    complex_amp = p[4] * ((1j * (x - f0) + (eps - kr / 2.)) / (1j * (x - f0) + 1j * p[3] + (eps + kr / 2.)))
+    complex_amp *= np.exp(1j * p[5] * np.pi / 180)
+    
     return np.r_[np.real(complex_amp), np.imag(complex_amp)].flatten()
 
 def s11_phase_func(x, *p):
