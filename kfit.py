@@ -231,7 +231,7 @@ def fit_complex_s11(xdata, ydata, fitparams=None, domain=None, showfit=False, sh
         fitdatay = ydata
     if fitparams is None:
         fitparams = [0, 0, 0, 0, 0, 0] # [f0, Qc, Qi, df, scale, phase_offset]
-        linewidth_guess = (max(fitdatax) - min(fitdatax)) / 10.
+        linewidth_guess = (np.max(fitdatax) - np.min(fitdatax)) / 10.
         fitparams[0] = fitdatax[np.argmin(np.abs(fitdatay))]
         fitparams[1] = fitparams[0] / linewidth_guess
         fitparams[2] = fitparams[0] / linewidth_guess
