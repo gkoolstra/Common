@@ -88,7 +88,7 @@ def plot_complex_fitresult(xdata, ydata, fitfunc, fitresult, mode='complex_plane
         plt.gca().set_aspect('equal')
         
     elif mode == 'mag_phase':
-        fitted_log_mag = 20 * np.log10(real_fit + 1j * imag_fit)
+        fitted_log_mag = 20 * np.log10(np.abs(real_fit + 1j * imag_fit))
         fitted_phase = np.arctan2(imag_fit, real_fit) * 180 / np.pi # units: degrees
         
         data_log_mag = 20 * np.log10(np.abs(ydata))
@@ -188,7 +188,7 @@ def fitbetter(xdata, ydata, fitfunc, fitparams, parambounds=None, domain=None, s
 #######################################################################
 #######################################################################
 
-def fit_complex_s21(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False,
+def fit_complex_s21(xdata, ydata, fitparams=None, domain=None, showfit=False, showstartfit=False, plot_mode='complex_plane',
                     verbose=True, **kwarg):
     
     # ydata is a complex array, xdata contains the frequency axis
@@ -205,7 +205,7 @@ def fit_complex_s21(xdata, ydata, fitparams=None, domain=None, showfit=False, sh
         
     fitdatay = np.r_[np.real(fitdatay), np.imag(fitdatay)].flatten()
 
-    params, param_errs = fitbetter(fitdatax, fitdatay, complex_s21_func, fitparams, domain=None, showfit=showfit,
+    params, param_errs = fitbetter(fitdatax, fitdatay, complex_s21_func, fitparams, domain=None, showfit=False,
                                    showstartfit=showstartfit, **kwarg)
     
     parnames = ['a', f'{chr(966)}', 'f0', chr(954)]
@@ -214,7 +214,9 @@ def fit_complex_s21(xdata, ydata, fitparams=None, domain=None, showfit=False, sh
     dataframe = dataframe.style.set_caption(f'Fit results for y = -a exp(i {chr(966)}) {chr(954)} / ({chr(954)} + i(f-f0))')
 
     if showfit:
-        plot_fitresult(fitdatax, fitdatay, params, param_errs, fitparam_names=parnames)
+        # plot_fitresult(fitdatax, fitdatay, params, param_errs, fitparam_names=parnames)
+        realdatay, imagdatay = fitdatay.reshape((2, -1))
+        plot_complex_fitresult(fitdatax, realdatay + 1j * imagdatay, complex_s21_func, dataframe.data, mode=plot_mode, fitparam_names=parnames)
 
     return dataframe
 
@@ -1134,8 +1136,8 @@ def complex_s11_func(x, *p):
     :return: p[4]*np.abs((1j*(x-p[0]) + (p[2]-p[1]/2.))/(1j*(x-p[0]) + 1j*p[3] + (p[2]+p[1]/2.)))
     """
     f0 = p[0]
-    eps = f0 / (2 * p[1])
-    kr = f0 / p[2]
+    eps = f0 / (2 * p[2])
+    kr = f0 / p[1]
     complex_amp = p[4] * ((1j * (x - f0) + (eps - kr / 2.)) / (1j * (x - f0) + 1j * p[3] + (eps + kr / 2.)))
     complex_amp *= np.exp(1j * p[5] * np.pi / 180)
     
