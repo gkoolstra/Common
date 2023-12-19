@@ -24,8 +24,9 @@ def argselectdomain(xdata, domain):
     return (ind[0], ind[1])
 
 def selectdomain(xdata, ydata, domain):
-    ind = np.searchsorted(xdata, domain)
-    return xdata[ind[0]:ind[1]], ydata[ind[0]:ind[1]]
+    order = np.argsort(xdata)
+    ind = np.searchsorted(xdata[order], domain)
+    return xdata[order][ind[0]:ind[1]], ydata[order][ind[0]:ind[1]]
 
 def zipsort(xdata, ydata):
     inds = np.argsort(xdata)
